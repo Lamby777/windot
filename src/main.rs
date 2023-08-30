@@ -1,5 +1,5 @@
 use gtk4 as gtk;
-use gtk::prelude::*;
+use gtk::{prelude::*, Button};
 use gtk::{glib, Application, ApplicationWindow};
 
 fn main() -> glib::ExitCode {
@@ -15,6 +15,12 @@ fn main() -> glib::ExitCode {
             .default_height(200)
             .title("Hello, World!")
             .build();
+
+        let button = Button::with_label("Click me!");
+        button.connect_clicked(|_| {
+            eprintln!("Clicked!");
+        });
+        window.set_child(Some(&button));
 
         // Show the window.
         window.present();

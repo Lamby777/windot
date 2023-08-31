@@ -1,6 +1,8 @@
-use gtk4 as gtk;
-use gtk::{prelude::*, Button};
 use gtk::{glib, Application, ApplicationWindow};
+use gtk::{prelude::*, Button};
+use gtk4 as gtk;
+
+mod emoji_ls;
 
 fn main() -> glib::ExitCode {
     let app = Application::builder()
@@ -11,20 +13,35 @@ fn main() -> glib::ExitCode {
         // We create the main window.
         let window = ApplicationWindow::builder()
             .application(app)
-            .default_width(320)
-            .default_height(200)
+            .default_width(440)
+            .default_height(440)
             .title("Hello, World!")
             .build();
 
-        let button = Button::with_label("Click me!");
-        button.connect_clicked(|_| {
-            eprintln!("Clicked!");
-        });
-        window.set_child(Some(&button));
+        let buttons: Vec<_> = make_emoji_buttons();
+
+        for b in buttons.iter() {
+            window.set_child(Some(b));
+        }
 
         // Show the window.
         window.present();
     });
 
     app.run()
+}
+
+fn make_emoji_buttons() -> Vec<Button> {
+    let mut res = vec![];
+
+    for _ in 0..10 {
+        let button = Button::with_label("Click me!");
+        button.connect_clicked(|_| {
+            eprintln!("Clicked!");
+        });
+
+        res.push(button);
+    }
+
+    res
 }

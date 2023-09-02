@@ -34,8 +34,13 @@ fn main() -> glib::ExitCode {
 fn make_emoji_buttons() -> Vec<Button> {
     let mut res = vec![];
 
-    for _ in 0..10 {
-        let button = Button::with_label("Click me!");
+    for i in 1..=10 {
+        // TODO seriously? can't this go before the loop?
+        // This is kinda ridiculous.
+        let text = i.to_string();
+        let builder = Button::builder().label(text);
+        let button = builder.build();
+
         button.connect_clicked(|_| {
             eprintln!("Clicked!");
         });

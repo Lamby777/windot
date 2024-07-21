@@ -1,51 +1,44 @@
-use gtk::{glib, Application, ApplicationWindow};
+use gtk::{glib, Application, ApplicationWindow, Grid};
 use gtk::{prelude::*, Button};
 
 mod emoji_ls;
 
+const APP_ID: &str = "org.sparklet.windot";
+
 fn main() -> glib::ExitCode {
-    let app = Application::builder()
-        .application_id("org.sparklet.windot")
-        .build();
-
-    app.connect_activate(|app| {
-        // We create the main window.
-        let window = ApplicationWindow::builder()
-            .application(app)
-            .default_width(440)
-            .default_height(440)
-            .title("Hello, World!")
-            .build();
-
-        let buttons: Vec<_> = make_emoji_buttons();
-
-        for b in buttons.iter() {
-            window.set_child(Some(b));
-        }
-
-        // Show the window.
-        window.present();
-    });
-
+    let app = Application::builder().application_id(APP_ID).build();
+    app.connect_activate(build_ui);
     app.run()
 }
 
-fn make_emoji_buttons() -> Vec<Button> {
-    let mut res = vec![];
+fn build_ui(app: &Application) {
+    let grid = Grid::builder()
+        .column_spacing(10)
+        .margin_top(10)
+        .margin_bottom(10)
+        .margin_start(10)
+        .margin_end(10)
+        .row_homogeneous(true)
+        .column_homogeneous(true)
+        .build();
 
-    for i in 1..=10 {
-        // TODO seriously? can't this go before the loop?
-        // This is kinda ridiculous.
-        let text = i.to_string();
-        let builder = Button::builder().label(text);
-        let button = builder.build();
+    for i in 0..10 {
+        let button = Button::builder().label(i.to_string()).build();
 
-        button.connect_clicked(move |_| {
-            eprintln!("Clicked! {}", i);
+        button.connect_clicked(|button| {
+            button.set_label("Hello World!");
         });
 
-        res.push(button);
+        grid.attach(&button, i, 0, 1, 1);
     }
 
-    res
+    // Create a window
+    let window = ApplicationWindow::builder()
+        .application(app)
+        .title("Select an emoji.")
+        .child(&grid)
+        .build();
+
+    // Present window
+    window.present();
 }

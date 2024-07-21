@@ -1,6 +1,5 @@
 use gtk::{glib, Application, ApplicationWindow};
 use gtk::{prelude::*, Button};
-use gtk4 as gtk;
 
 mod emoji_ls;
 
@@ -41,8 +40,8 @@ fn make_emoji_buttons() -> Vec<Button> {
         let builder = Button::builder().label(text);
         let button = builder.build();
 
-        button.connect_clicked(|_| {
-            eprintln!("Clicked!");
+        button.connect_clicked(move |_| {
+            eprintln!("Clicked! {}", i);
         });
 
         res.push(button);

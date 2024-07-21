@@ -1,3 +1,4 @@
+use emojis::Emoji;
 use gtk::{glib, Application, ApplicationWindow, Grid};
 use gtk::{prelude::*, Button};
 
@@ -23,13 +24,10 @@ fn build_ui(app: &Application) {
         .column_homogeneous(true)
         .build();
 
-    // just piggies for now
-    let emojis = ['🐷'; 21];
-
     let mut row = 0;
     let mut col = 0;
 
-    for emoji in emojis.iter() {
+    for emoji in emoji_ls::list_emojis() {
         let button = Button::builder().label(emoji.to_string()).build();
 
         button.connect_clicked(|button| {

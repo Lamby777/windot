@@ -1,6 +1,7 @@
-use emojis::{Emoji, Group};
-use gtk::{glib, Application, ApplicationWindow, Grid, Orientation, Stack, StackSidebar};
-use gtk::{prelude::*, Button};
+use cli_clipboard;
+use emojis::Group;
+use gtk::prelude::*;
+use gtk::{glib, Application, ApplicationWindow, Button, Grid, Orientation, Stack, StackSidebar};
 
 const APP_ID: &str = "org.sparklet.windot";
 const EMOJIS_PER_ROW: i32 = 10;
@@ -77,7 +78,9 @@ fn build_grid(group: Group) -> Grid {
         let button = Button::builder().label(emoji.to_string()).build();
 
         button.connect_clicked(|button| {
-            println!("Button clicked: {}", button.label().unwrap());
+            let emoji = button.label().unwrap();
+            println!("Button clicked: {}", emoji);
+            cli_clipboard::set_contents(emoji.to_string()).unwrap();
         });
         grid.attach(&button, col, row, 1, 1);
 

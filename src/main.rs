@@ -41,7 +41,7 @@ fn build_ui(app: &Application) {
 
     for group in GROUPS {
         let grid = build_grid(*group);
-        let name = format!("{:?}", group);
+        let name = group_display_name(*group);
         stack.add_titled(&grid, Some(&name), &name);
     }
 
@@ -90,4 +90,18 @@ fn build_grid(group: Group) -> Grid {
     }
 
     grid
+}
+
+fn group_display_name(group: Group) -> &'static str {
+    match group {
+        Group::SmileysAndEmotion => "😄 Smileys & Emotion",
+        Group::PeopleAndBody => "🧑 People & Body",
+        Group::AnimalsAndNature => "🐷 Animals & Nature",
+        Group::Activities => "⚽ Activities",
+        Group::FoodAndDrink => "🍕 Food & Drink",
+        Group::Objects => "🧦 Objects",
+        Group::TravelAndPlaces => "✈️ Travel & Places",
+        Group::Symbols => "☢️ Symbols",
+        Group::Flags => "🏳️‍⚧️ Flags",
+    }
 }

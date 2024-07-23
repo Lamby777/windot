@@ -1,8 +1,8 @@
 use std::fs;
 use std::path::PathBuf;
-use std::sync::OnceLock;
+use std::sync::{LazyLock, OnceLock};
 
-use emojis::{Emoji, Group};
+use emojis::Emoji;
 use gtk::prelude::*;
 use gtk::{
     glib, Application, ApplicationWindow, Button, CssProvider, Grid,
@@ -10,26 +10,15 @@ use gtk::{
 };
 
 mod components;
-use components::*;
 mod config;
+mod consts;
+
+use components::*;
 use config::*;
-
-const APP_ID: &str = "org.sparklet.windot";
-const EMOJIS_PER_ROW: i32 = 10;
-
-const GROUPS: &[Group] = &[
-    Group::SmileysAndEmotion,
-    Group::PeopleAndBody,
-    Group::AnimalsAndNature,
-    Group::Activities,
-    Group::FoodAndDrink,
-    Group::Objects,
-    Group::TravelAndPlaces,
-    Group::Symbols,
-    Group::Flags,
-];
+use consts::*;
 
 static WINDOW: OnceLock<SApplicationWindow> = OnceLock::new();
+static CONFIG: LazyLock<Config> = LazyLock::new(Config::load_or_create);
 
 /// Wrapper around `ApplicationWindow` to implement `Send` and `Sync`.
 #[derive(Debug)]
@@ -123,18 +112,4 @@ fn build_ui(app: &Application) {
 // getter in case i gotta change this later
 fn all_emojis() -> impl Iterator<Item = &'static Emoji> {
     emojis::iter()
-}
-
-fn group_display_name(group: Group) -> &'static str {
-    match group {
-        Group::SmileysAndEmotion => "😄 Smileys & Emotion",
-        Group::PeopleAndBody => "🧑 People & Body",
-        Group::AnimalsAndNature => "🐷 Animals & Nature",
-        Group::Activities => "⚽ Activities",
-        Group::FoodAndDrink => "🍕 Food & Drink",
-        Group::Objects => "🧦 Objects",
-        Group::TravelAndPlaces => "✈️ Travel & Places",
-        Group::Symbols => "☢️ Symbols",
-        Group::Flags => "🏳️‍⚧️ Flags",
-    }
 }

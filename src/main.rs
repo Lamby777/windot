@@ -1,5 +1,5 @@
 use cli_clipboard;
-use emojis::Group;
+use emojis::{Emoji, Group};
 use gtk::prelude::*;
 use gtk::{glib, Application, ApplicationWindow, Button, Grid, Orientation, Stack, StackSidebar};
 
@@ -41,7 +41,7 @@ fn build_ui(app: &Application) {
         .build();
 
     for group in GROUPS {
-        let grid = build_grid(*group);
+        let grid = build_grid(group.emojis().take(200));
         let name = group_display_name(*group);
         stack.add_titled(&grid, Some(&name), &name);
     }
@@ -60,7 +60,7 @@ fn build_ui(app: &Application) {
     window.present();
 }
 
-fn build_grid(group: Group) -> Grid {
+fn build_grid(emojis: impl Iterator<Item = &'static Emoji>) -> Grid {
     let grid = Grid::builder()
         .column_spacing(10)
         .margin_top(10)
@@ -74,7 +74,7 @@ fn build_grid(group: Group) -> Grid {
     let mut row = 0;
     let mut col = 0;
 
-    for emoji in group.emojis().take(200) {
+    for emoji in emojis {
         let button = Button::builder().label(emoji.to_string()).build();
 
         button.connect_clicked(|button| {

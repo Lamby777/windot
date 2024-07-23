@@ -5,6 +5,9 @@ use gtk::{glib, Application, ApplicationWindow, Button, Grid, Orientation, Stack
 
 const APP_ID: &str = "org.sparklet.windot";
 const EMOJIS_PER_ROW: i32 = 10;
+const EMOJIS_PER_COL: i32 = 10;
+
+const EMOJIS_PER_PAGE: usize = (EMOJIS_PER_ROW * EMOJIS_PER_COL) as usize;
 
 const GROUPS: &[Group] = &[
     Group::SmileysAndEmotion,
@@ -34,7 +37,10 @@ fn build_ui(app: &Application) {
         .orientation(Orientation::Horizontal)
         .build();
 
-    let stack = Stack::builder().build();
+    let stack = Stack::builder()
+        .height_request(400)
+        .vhomogeneous(false)
+        .build();
     let sidebar = StackSidebar::builder()
         .width_request(200)
         .stack(&stack)
@@ -42,7 +48,7 @@ fn build_ui(app: &Application) {
 
     // build the "all" category
     {
-        let grid = build_grid(emojis::iter());
+        let grid = build_grid(all_emojis());
         let name = "🌍 All";
         stack.add_titled(&grid, Some(&name), &name);
     }
@@ -82,7 +88,7 @@ fn build_grid(emojis: impl Iterator<Item = &'static Emoji>) -> Grid {
     let mut row = 0;
     let mut col = 0;
 
-    for emoji in emojis {
+    for emoji in emojis.take(EMOJIS_PER_PAGE) {
         let button = Button::builder().label(emoji.to_string()).build();
 
         button.connect_clicked(|button| {
@@ -101,6 +107,11 @@ fn build_grid(emojis: impl Iterator<Item = &'static Emoji>) -> Grid {
     }
 
     grid
+}
+
+fn all_emojis() -> impl Iterator<Item = &'static Emoji> {
+    // emojis::iter().filter(|v| v.unicode_version() < emojis::UnicodeVersion::new(15, 1))
+    emojis::iter()
 }
 
 fn group_display_name(group: Group) -> &'static str {

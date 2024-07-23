@@ -58,11 +58,12 @@ fn build_ui(app: &Application) {
         .build();
 
     // build the "search" stack
-    {
+    let search_pane = {
         let search = build_search();
         let name = "🔎 Search";
         stack.add_titled(&search, Some(&name), &name);
-    }
+        search
+    };
 
     // build the "all" stack
     {
@@ -87,6 +88,8 @@ fn build_ui(app: &Application) {
         .title("Select an emoji.")
         .child(&main_box)
         .build();
+
+    search_pane.first_child().unwrap().grab_focus();
 
     // Present window
     window.present();

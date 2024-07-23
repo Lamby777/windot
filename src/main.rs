@@ -1,3 +1,5 @@
+use std::fs;
+use std::path::PathBuf;
 use std::sync::OnceLock;
 
 use emojis::{Emoji, Group};
@@ -9,6 +11,8 @@ use gtk::{
 
 mod components;
 use components::*;
+mod config;
+use config::*;
 
 const APP_ID: &str = "org.sparklet.windot";
 const EMOJIS_PER_ROW: i32 = 10;
@@ -34,6 +38,13 @@ unsafe impl Sync for SApplicationWindow {}
 unsafe impl Send for SApplicationWindow {}
 
 fn main() -> glib::ExitCode {
+    // make the user data folder
+    let data_dir = user_data_dir();
+    if !data_dir.exists() && fs::create_dir_all(&data_dir).is_err() {
+        eprintln!("warning: could not create data directory.");
+    }
+
+    // start the app
     let app = Application::builder().application_id(APP_ID).build();
     app.connect_activate(build_ui);
     app.connect_startup(|_| load_css());

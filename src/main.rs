@@ -85,12 +85,21 @@ fn build_search() -> gtk::Box {
         .orientation(Orientation::Vertical)
         .build();
 
-    let searchbox = SearchEntry::builder().build();
-
     let grid = build_grid(all_emojis());
+
+    let searchbox = SearchEntry::builder().build();
 
     stack.append(&searchbox);
     stack.append(&grid);
+
+    searchbox.connect_search_changed(move |sb| {
+        let parent: gtk::Box = unsafe { sb.parent().unwrap().unsafe_cast() };
+        parent.remove(&parent.last_child().unwrap());
+
+        parent.append(&build_grid(all_emojis().filter(|e| {
+            e.shortcodes().any(|sc| sc.contains(&sb.text().to_string()))
+        })));
+    });
 
     stack
 }

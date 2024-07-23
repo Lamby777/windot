@@ -1,9 +1,9 @@
 use emojis::{Emoji, Group};
+use gtk::prelude::*;
 use gtk::{
-    glib, Application, ApplicationWindow, Button, CssProvider, Grid, Orientation, SearchEntry,
-    Stack, StackSidebar,
+    glib, Application, ApplicationWindow, Button, CssProvider, Grid,
+    Orientation, ScrolledWindow, SearchEntry, Stack, StackSidebar,
 };
-use gtk::{prelude::*, ScrolledWindow};
 
 const APP_ID: &str = "org.sparklet.windot";
 const EMOJIS_PER_ROW: i32 = 10;

@@ -40,8 +40,16 @@ fn build_ui(app: &Application) {
         .stack(&stack)
         .build();
 
+    // build the "all" category
+    {
+        let grid = build_grid(emojis::iter());
+        let name = "🌍 All";
+        stack.add_titled(&grid, Some(&name), &name);
+    }
+
+    // build the group categories
     for group in GROUPS {
-        let grid = build_grid(group.emojis().take(200));
+        let grid = build_grid(group.emojis());
         let name = group_display_name(*group);
         stack.add_titled(&grid, Some(&name), &name);
     }

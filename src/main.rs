@@ -1,5 +1,8 @@
 use emojis::{Emoji, Group};
-use gtk::{glib, Application, ApplicationWindow, Button, Grid, Orientation, Stack, StackSidebar};
+use gtk::{
+    glib, Application, ApplicationWindow, Button, Grid, Orientation, SearchEntry, Stack,
+    StackSidebar,
+};
 use gtk::{prelude::*, ScrolledWindow};
 
 const APP_ID: &str = "org.sparklet.windot";
@@ -42,14 +45,21 @@ fn build_ui(app: &Application) {
         .stack(&stack)
         .build();
 
-    // build the "all" category
+    // build the "search" stack
+    {
+        let search = build_search();
+        let name = "🔎 Search";
+        stack.add_titled(&search, Some(&name), &name);
+    }
+
+    // build the "all" stack
     {
         let grid = build_grid(all_emojis());
         let name = "🌍 All";
         stack.add_titled(&grid, Some(&name), &name);
     }
 
-    // build the group categories
+    // build the group stacks
     for group in GROUPS {
         let grid = build_grid(group.emojis());
         let name = group_display_name(*group);
@@ -74,6 +84,25 @@ fn build_ui(app: &Application) {
 
     // Present window
     window.present();
+}
+
+fn build_search() -> gtk::Box {
+    let stack = gtk::Box::builder()
+        .orientation(Orientation::Vertical)
+        .build();
+
+    let searchbox = SearchEntry::builder().build();
+    // let separator = Separator::builder()
+    //     .orientation(Orientation::Horizontal)
+    //     .build();
+
+    let grid = build_grid(all_emojis());
+
+    stack.append(&searchbox);
+    // stack.append(&separator);
+    stack.append(&grid);
+
+    stack
 }
 
 fn build_grid(emojis: impl Iterator<Item = &'static Emoji>) -> Grid {

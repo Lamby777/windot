@@ -73,7 +73,7 @@ fn build_ui(app: &Application) {
 
     // build the group stacks
     for group in GROUPS {
-        let grid = build_grid(group.emojis());
+        let grid = build_grid(all_emojis().filter(|e| e.group() == *group));
         let name = group_display_name(*group);
         stack.add_titled(&grid, Some(&name), &name);
     }

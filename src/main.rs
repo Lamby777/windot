@@ -1,7 +1,7 @@
 use emojis::{Emoji, Group};
 use gtk::{
-    glib, Application, ApplicationWindow, Button, Grid, Orientation, SearchEntry, Stack,
-    StackSidebar,
+    glib, Application, ApplicationWindow, Button, CssProvider, Grid, Orientation, SearchEntry,
+    Stack, StackSidebar,
 };
 use gtk::{prelude::*, ScrolledWindow};
 
@@ -23,7 +23,19 @@ const GROUPS: &[Group] = &[
 fn main() -> glib::ExitCode {
     let app = Application::builder().application_id(APP_ID).build();
     app.connect_activate(build_ui);
+    app.connect_startup(|_| load_css());
     app.run()
+}
+
+fn load_css() {
+    let css = CssProvider::new();
+    css.load_from_string(include_str!("style.css"));
+
+    gtk::style_context_add_provider_for_display(
+        &gtk::gdk::Display::default().expect("Could not connect to a display."),
+        &css,
+        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+    );
 }
 
 fn build_ui(app: &Application) {

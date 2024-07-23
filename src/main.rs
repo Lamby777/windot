@@ -66,14 +66,8 @@ fn build_ui(app: &Application) {
         stack.add_titled(&grid, Some(&name), &name);
     }
 
-    let scrollable = ScrolledWindow::builder()
-        .child(&stack)
-        .width_request(500)
-        .height_request(400)
-        .build();
-
     main_box.append(&sidebar);
-    main_box.append(&scrollable);
+    main_box.append(&stack);
 
     // Create a window
     let window = ApplicationWindow::builder()
@@ -92,20 +86,16 @@ fn build_search() -> gtk::Box {
         .build();
 
     let searchbox = SearchEntry::builder().build();
-    // let separator = Separator::builder()
-    //     .orientation(Orientation::Horizontal)
-    //     .build();
 
     let grid = build_grid(all_emojis());
 
     stack.append(&searchbox);
-    // stack.append(&separator);
     stack.append(&grid);
 
     stack
 }
 
-fn build_grid(emojis: impl Iterator<Item = &'static Emoji>) -> Grid {
+fn build_grid(emojis: impl Iterator<Item = &'static Emoji>) -> ScrolledWindow {
     let grid = Grid::builder()
         .column_spacing(10)
         .margin_top(10)
@@ -138,11 +128,17 @@ fn build_grid(emojis: impl Iterator<Item = &'static Emoji>) -> Grid {
         }
     }
 
-    grid
+    ScrolledWindow::builder()
+        .hscrollbar_policy(gtk::PolicyType::Never)
+        .vscrollbar_policy(gtk::PolicyType::Automatic)
+        .width_request(500)
+        .height_request(400)
+        .child(&grid)
+        .build()
 }
 
+// getter in case i gotta change this later
 fn all_emojis() -> impl Iterator<Item = &'static Emoji> {
-    // emojis::iter().filter(|v| v.unicode_version() < emojis::UnicodeVersion::new(15, 1))
     emojis::iter()
 }
 

@@ -1,13 +1,9 @@
-use cli_clipboard;
 use emojis::{Emoji, Group};
-use gtk::prelude::*;
 use gtk::{glib, Application, ApplicationWindow, Button, Grid, Orientation, Stack, StackSidebar};
+use gtk::{prelude::*, ScrolledWindow};
 
 const APP_ID: &str = "org.sparklet.windot";
 const EMOJIS_PER_ROW: i32 = 10;
-const EMOJIS_PER_COL: i32 = 10;
-
-const EMOJIS_PER_PAGE: usize = (EMOJIS_PER_ROW * EMOJIS_PER_COL) as usize;
 
 const GROUPS: &[Group] = &[
     Group::SmileysAndEmotion,
@@ -60,8 +56,14 @@ fn build_ui(app: &Application) {
         stack.add_titled(&grid, Some(&name), &name);
     }
 
+    let scrollable = ScrolledWindow::builder()
+        .child(&stack)
+        .width_request(500)
+        .height_request(400)
+        .build();
+
     main_box.append(&sidebar);
-    main_box.append(&stack);
+    main_box.append(&scrollable);
 
     // Create a window
     let window = ApplicationWindow::builder()
@@ -88,7 +90,8 @@ fn build_grid(emojis: impl Iterator<Item = &'static Emoji>) -> Grid {
     let mut row = 0;
     let mut col = 0;
 
-    for emoji in emojis.take(EMOJIS_PER_PAGE) {
+    // for emoji in emojis.take(EMOJIS_PER_PAGE) {
+    for emoji in emojis {
         let button = Button::builder().label(emoji.to_string()).build();
 
         button.connect_clicked(|button| {

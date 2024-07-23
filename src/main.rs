@@ -1,6 +1,8 @@
 use std::sync::OnceLock;
+use std::thread;
 
 use emojis::{Emoji, Group};
+use enigo::{Enigo, Keyboard as _};
 use gtk::prelude::*;
 use gtk::{
     glib, Application, ApplicationWindow, Button, CssProvider, Grid,
@@ -35,6 +37,27 @@ fn main() -> glib::ExitCode {
     app.connect_activate(build_ui);
     app.connect_startup(|_| load_css());
     app.run()
+}
+
+fn on_emoji_clicked(button: &Button) {
+    let emoji = button.label().unwrap();
+    let emoji_string = emoji.to_string();
+
+    println!("Button clicked: {}", emoji);
+
+    println!("Copying {} to clipboard.", emoji_string);
+    cli_clipboard::set_contents(emoji_string.clone()).unwrap();
+    WINDOW.get().unwrap().0.close();
+
+    println!("Typing {}", emoji_string);
+
+    thread::sleep(std::time::Duration::from_millis(5000));
+    type_emoji(&emoji_string);
+}
+
+fn type_emoji(emoji: &str) {
+    let mut enigo = Enigo::new(&enigo::Settings::default()).unwrap();
+    enigo.text(emoji).unwrap();
 }
 
 fn load_css() {
@@ -148,12 +171,7 @@ fn build_grid(emojis: impl Iterator<Item = &'static Emoji>) -> ScrolledWindow {
     for emoji in emojis {
         let button = Button::builder().label(emoji.to_string()).build();
 
-        button.connect_clicked(|button| {
-            let emoji = button.label().unwrap();
-            println!("Button clicked: {}", emoji);
-            cli_clipboard::set_contents(emoji.to_string()).unwrap();
-            WINDOW.get().unwrap().0.close();
-        });
+        button.connect_clicked(on_emoji_clicked);
         grid.attach(&button, col, row, 1, 1);
 
         col += 1;

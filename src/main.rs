@@ -1,3 +1,5 @@
+use std::sync::OnceLock;
+
 use emojis::{Emoji, Group};
 use gtk::prelude::*;
 use gtk::{
@@ -19,6 +21,14 @@ const GROUPS: &[Group] = &[
     Group::Symbols,
     Group::Flags,
 ];
+
+static WINDOW: OnceLock<SApplicationWindow> = OnceLock::new();
+
+/// Wrapper around `ApplicationWindow` to implement `Send` and `Sync`.
+#[derive(Debug)]
+struct SApplicationWindow(ApplicationWindow);
+unsafe impl Sync for SApplicationWindow {}
+unsafe impl Send for SApplicationWindow {}
 
 fn main() -> glib::ExitCode {
     let app = Application::builder().application_id(APP_ID).build();
@@ -93,6 +103,7 @@ fn build_ui(app: &Application) {
 
     // Present window
     window.present();
+    WINDOW.set(SApplicationWindow(window)).unwrap();
 }
 
 fn build_search() -> gtk::Box {
@@ -141,6 +152,7 @@ fn build_grid(emojis: impl Iterator<Item = &'static Emoji>) -> ScrolledWindow {
             let emoji = button.label().unwrap();
             println!("Button clicked: {}", emoji);
             cli_clipboard::set_contents(emoji.to_string()).unwrap();
+            WINDOW.get().unwrap().0.close();
         });
         grid.attach(&button, col, row, 1, 1);
 

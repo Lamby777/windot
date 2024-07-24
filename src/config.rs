@@ -16,7 +16,7 @@ pub fn config_file_path() -> PathBuf {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     pub preferred_skin_tone: SkinTone,
-    pub recent_emojis: Vec<&'static Emoji>,
+    pub recent_emojis: Vec<Emoji>,
 }
 
 impl Config {
@@ -28,13 +28,13 @@ impl Config {
             config.save();
             config
         } else {
-            Self::load(&config_path).unwrap()
+            Self::load(&config_path)
         }
     }
 
-    pub fn load(path: &Path) -> Option<Self> {
-        let config_toml = fs::read_to_string(path).ok()?;
-        toml::from_str(&config_toml).ok()
+    pub fn load(path: &Path) -> Self {
+        let config_toml = fs::read_to_string(path).unwrap();
+        toml::from_str(&config_toml).unwrap()
     }
 
     pub fn save(&self) {

@@ -1,6 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
-use std::sync::{LazyLock, OnceLock, RwLock};
+use std::sync::{OnceLock, RwLock};
 
 use emojis::Emoji;
 use gtk::prelude::*;
@@ -18,8 +18,7 @@ use config::*;
 use consts::*;
 
 static WINDOW: OnceLock<SApplicationWindow> = OnceLock::new();
-static CONFIG: RwLock<LazyLock<Config>> =
-    RwLock::new(LazyLock::new(Config::load_or_create));
+static CONFIG: RwLock<Option<Config>> = RwLock::new(None);
 
 /// Wrapper around `ApplicationWindow` to implement `Send` and `Sync`.
 #[derive(Debug)]
@@ -33,13 +32,32 @@ fn main() -> glib::ExitCode {
     if !data_dir.exists() && fs::create_dir_all(&data_dir).is_err() {
         eprintln!("warning: could not create data directory.");
     }
-    CONFIG.read().unwrap().save();
+    let config = Config::load_or_create();
+    CONFIG.write().unwrap().replace(config);
 
     // start the app
     let app = Application::builder().application_id(APP_ID).build();
     app.connect_activate(build_ui);
     app.connect_startup(|_| load_css());
     app.run()
+}
+
+fn on_emoji_picked(button: &Button) {
+    let emoji = button.label().unwrap();
+    println!("Button clicked: {}", emoji);
+
+    cli_clipboard::set_contents(emoji.to_string()).unwrap();
+    CONFIG
+        .write()
+        .unwrap()
+        .as_mut()
+        .unwrap()
+        .recent_emojis
+        .push(emojis::iter().find(|e| **e == *emoji).unwrap());
+
+    CONFIG.read().unwrap().as_ref().unwrap().save();
+
+    WINDOW.get().unwrap().0.close();
 }
 
 fn load_css() {
@@ -78,6 +96,22 @@ fn build_ui(app: &Application) {
         let name = "🔎 Search";
         stack.add_titled(&search, Some(&name), &name);
         search
+    };
+
+    // build the "search" stack
+    {
+        let search = build_grid(
+            CONFIG
+                .read()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .recent_emojis
+                .clone()
+                .into_iter(),
+        );
+        let name = "🕒 Recents";
+        stack.add_titled(&search, Some(&name), &name);
     };
 
     // build the "all" stack

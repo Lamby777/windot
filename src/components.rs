@@ -44,12 +44,7 @@ pub fn build_grid(
     for emoji in emojis {
         let button = Button::builder().label(emoji.to_string()).build();
 
-        button.connect_clicked(|button| {
-            let emoji = button.label().unwrap();
-            println!("Button clicked: {}", emoji);
-            cli_clipboard::set_contents(emoji.to_string()).unwrap();
-            WINDOW.get().unwrap().0.close();
-        });
+        button.connect_clicked(on_emoji_picked);
         grid.attach(&button, col, row, 1, 1);
 
         col += 1;

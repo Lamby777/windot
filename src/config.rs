@@ -10,13 +10,13 @@ pub fn user_data_dir() -> PathBuf {
 }
 
 pub fn config_file_path() -> PathBuf {
-    user_data_dir().join("config.toml")
+    user_data_dir().join("config.json")
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     pub preferred_skin_tone: SkinTone,
-    pub recent_emojis: Vec<Emoji>,
+    pub recent_emojis: Vec<&'static Emoji>,
 }
 
 impl Config {
@@ -33,13 +33,13 @@ impl Config {
     }
 
     pub fn load(path: &Path) -> Self {
-        let config_toml = fs::read_to_string(path).unwrap();
-        toml::from_str(&config_toml).unwrap()
+        let config_file = fs::read_to_string(path).unwrap();
+        serde_json::from_str(&config_file).unwrap()
     }
 
     pub fn save(&self) {
-        let config_toml = toml::to_string(self).unwrap();
-        fs::write(config_file_path(), config_toml).unwrap();
+        let config_file = serde_json::to_string(self).unwrap();
+        fs::write(config_file_path(), config_file).unwrap();
     }
 }
 

@@ -42,7 +42,7 @@ fn main() -> glib::ExitCode {
     app.run()
 }
 
-fn on_emoji_picked(button: &Button, close: bool) {
+fn on_emoji_picked(button: &Button) {
     let emoji = button.label().unwrap();
     println!("Picked: {}", emoji);
 
@@ -56,10 +56,6 @@ fn on_emoji_picked(button: &Button, close: bool) {
         .push(emojis::iter().find(|e| **e == *emoji).unwrap());
 
     CONFIG.read().unwrap().as_ref().unwrap().save();
-
-    if !close {
-        return;
-    }
 
     println!("Closing...");
     WINDOW.get().unwrap().0.close();
@@ -117,6 +113,12 @@ fn build_ui(app: &Application) {
         );
         let name = "🕒 Recents";
         stack.add_titled(&search, Some(&name), &name);
+    };
+
+    let variants_pane = {
+        let grid = build_grid(std::iter::empty());
+        let name = "🔄 Variants";
+        stack.add_named(&grid, Some(&name));
     };
 
     // build the group stacks

@@ -43,22 +43,7 @@ pub fn build_grid(
     let mut col = 0;
 
     for emoji in emojis {
-        let button =
-            Rc::new(Button::builder().label(emoji.to_string()).build());
-
-        button.connect_clicked(|button| on_emoji_picked(button, true));
-
-        // if right click, don't close
-        let gesture = gtk::GestureClick::new();
-        gesture.set_button(gtk::gdk::ffi::GDK_BUTTON_SECONDARY as u32);
-
-        let button2 = button.clone();
-        gesture.connect_pressed(move |gesture, _, _, _| {
-            gesture.set_state(gtk::EventSequenceState::Claimed);
-            on_emoji_picked(&button2, false)
-        });
-        button.add_controller(gesture);
-
+        let button = make_button(emoji);
         grid.attach(&*button, col, row, 1, 1);
 
         col += 1;
@@ -76,4 +61,23 @@ pub fn build_grid(
         .height_request(400)
         .child(&grid)
         .build()
+}
+
+fn make_button(emoji: &'static Emoji) -> Rc<Button> {
+    let button = Rc::new(Button::builder().label(emoji.to_string()).build());
+
+    button.connect_clicked(on_emoji_picked);
+
+    // if right click, change skin tone
+    let gesture = gtk::GestureClick::new();
+    gesture.set_button(gtk::gdk::ffi::GDK_BUTTON_SECONDARY as u32);
+
+    let button2 = button.clone();
+    gesture.connect_pressed(move |gesture, _, _, _| {
+        gesture.set_state(gtk::EventSequenceState::Claimed);
+        on_emoji_picked(&button2)
+    });
+    button.add_controller(gesture);
+
+    button
 }

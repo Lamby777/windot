@@ -10,7 +10,7 @@ pub fn user_data_dir() -> PathBuf {
 }
 
 pub fn config_file_path() -> PathBuf {
-    user_data_dir().join("config.json")
+    user_data_dir().join("state.json")
 }
 
 #[derive(Debug, Serialize, Deserialize)]

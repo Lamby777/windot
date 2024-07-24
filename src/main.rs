@@ -45,19 +45,19 @@ fn main() -> glib::ExitCode {
 fn on_emoji_picked(button: &Button) {
     let emoji = button.label().unwrap();
     println!("Picked: {}", emoji);
-
     cli_clipboard::set_contents(emoji.to_string()).unwrap();
-    CONFIG
-        .write()
-        .unwrap()
-        .as_mut()
-        .unwrap()
-        .recent_emojis
-        .push(emojis::iter().find(|e| **e == *emoji).unwrap());
 
-    CONFIG.read().unwrap().as_ref().unwrap().save();
+    let mut conf = CONFIG.write().unwrap();
+    let conf = conf.as_mut().unwrap();
+
+    // push to recents
+    let emoji = emojis::iter().find(|e| **e == *emoji).unwrap();
+    if !conf.recent_emojis.contains(&emoji) {
+        conf.recent_emojis.push(emoji);
+    }
 
     println!("Closing...");
+    conf.save();
     WINDOW.get().unwrap().0.close();
 }
 

@@ -68,7 +68,7 @@ fn make_button(emoji: &'static Emoji) -> Rc<Button> {
 
     button.connect_clicked(on_emoji_picked);
 
-    // if right click, change skin tone
+    // if right click, show variants
     let gesture = gtk::GestureClick::new();
     gesture.set_button(gtk::gdk::ffi::GDK_BUTTON_SECONDARY as u32);
 

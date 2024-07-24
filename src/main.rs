@@ -42,9 +42,9 @@ fn main() -> glib::ExitCode {
     app.run()
 }
 
-fn on_emoji_picked(button: &Button) {
+fn on_emoji_picked(button: &Button, close: bool) {
     let emoji = button.label().unwrap();
-    println!("Button clicked: {}", emoji);
+    println!("Picked: {}", emoji);
 
     cli_clipboard::set_contents(emoji.to_string()).unwrap();
     CONFIG
@@ -57,6 +57,11 @@ fn on_emoji_picked(button: &Button) {
 
     CONFIG.read().unwrap().as_ref().unwrap().save();
 
+    if !close {
+        return;
+    }
+
+    println!("Closing...");
     WINDOW.get().unwrap().0.close();
 }
 

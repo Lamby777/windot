@@ -114,13 +114,6 @@ fn build_ui(app: &Application) {
         stack.add_titled(&search, Some(&name), &name);
     };
 
-    // build the "all" stack
-    {
-        let grid = build_grid(all_emojis());
-        let name = "🌍 All";
-        stack.add_titled(&grid, Some(&name), &name);
-    }
-
     // build the group stacks
     for group in GROUPS {
         let grid = build_grid(all_emojis().filter(|e| e.group() == *group));

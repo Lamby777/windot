@@ -40,7 +40,6 @@ pub fn build_grid(
     let mut row = 0;
     let mut col = 0;
 
-    // for emoji in emojis.take(EMOJIS_PER_PAGE) {
     for emoji in emojis {
         let button = Button::builder().label(emoji.to_string()).build();
 

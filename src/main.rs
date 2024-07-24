@@ -1,6 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
-use std::sync::{LazyLock, OnceLock};
+use std::sync::{LazyLock, OnceLock, RwLock};
 
 use emojis::Emoji;
 use gtk::prelude::*;
@@ -18,7 +18,8 @@ use config::*;
 use consts::*;
 
 static WINDOW: OnceLock<SApplicationWindow> = OnceLock::new();
-static CONFIG: LazyLock<Config> = LazyLock::new(Config::load_or_create);
+static CONFIG: RwLock<LazyLock<Config>> =
+    RwLock::new(LazyLock::new(Config::load_or_create));
 
 /// Wrapper around `ApplicationWindow` to implement `Send` and `Sync`.
 #[derive(Debug)]
@@ -32,6 +33,7 @@ fn main() -> glib::ExitCode {
     if !data_dir.exists() && fs::create_dir_all(&data_dir).is_err() {
         eprintln!("warning: could not create data directory.");
     }
+    CONFIG.read().unwrap().save();
 
     // start the app
     let app = Application::builder().application_id(APP_ID).build();

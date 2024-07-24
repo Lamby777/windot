@@ -15,7 +15,7 @@ pub fn build_search() -> gtk::Box {
     stack.append(&grid);
 
     searchbox.connect_search_changed(move |sb| {
-        let parent: gtk::Box = unsafe { sb.parent().unwrap().unsafe_cast() };
+        let parent = sb.parent().unwrap().downcast::<gtk::Box>().unwrap();
         parent.remove(&parent.last_child().unwrap());
 
         parent.append(&build_grid(all_emojis().filter(|e| {
@@ -75,7 +75,7 @@ fn make_button(emoji: &'static Emoji) -> Rc<Button> {
     let button2 = button.clone();
     gesture.connect_pressed(move |gesture, _, _, _| {
         gesture.set_state(gtk::EventSequenceState::Claimed);
-        on_emoji_picked(&button2)
+        on_variants_request(&button2)
     });
     button.add_controller(gesture);
 

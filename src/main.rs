@@ -61,6 +61,34 @@ fn on_emoji_picked(button: &Button) {
     WINDOW.get().unwrap().0.close();
 }
 
+fn on_variants_request(button: &Button) {
+    let emoji = button.label().unwrap();
+    println!("Requesting Variants: {}", emoji);
+
+    // push to recents
+    let emoji = emojis::iter().find(|e| **e == *emoji).unwrap();
+    let Some(skin_tones_iter) = emoji.skin_tones() else {
+        println!("No variants, returning.");
+        return;
+    };
+
+    let variant_grid = build_grid(skin_tones_iter);
+    let stack: Stack = WINDOW
+        .get()
+        .unwrap()
+        .0
+        .child()
+        .unwrap()
+        .last_child()
+        .unwrap()
+        .downcast()
+        .unwrap();
+    let last_child = stack.last_child().unwrap();
+    stack.remove(&last_child);
+
+    stack.add_named(&variant_grid, Some("🔄 Variants"));
+}
+
 fn load_css() {
     let css = CssProvider::new();
     css.load_from_string(include_str!("style.css"));
@@ -113,12 +141,6 @@ fn build_ui(app: &Application) {
         );
         let name = "🕒 Recents";
         stack.add_titled(&search, Some(&name), &name);
-    };
-
-    let variants_pane = {
-        let grid = build_grid(std::iter::empty());
-        let name = "🔄 Variants";
-        stack.add_named(&grid, Some(&name));
     };
 
     // build the group stacks

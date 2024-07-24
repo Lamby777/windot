@@ -16,6 +16,7 @@ pub fn config_file_path() -> PathBuf {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     pub preferred_skin_tone: SkinTone,
+    pub recent_emojis: Vec<&'static Emoji>,
 }
 
 impl Config {
@@ -46,6 +47,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             preferred_skin_tone: SkinTone::Default,
+            recent_emojis: vec![],
         }
     }
 }

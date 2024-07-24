@@ -72,21 +72,22 @@ fn on_variants_request(button: &Button) {
         return;
     };
 
-    let variant_grid = build_grid(skin_tones_iter);
-    let stack: Stack = WINDOW
-        .get()
-        .unwrap()
-        .0
-        .child()
-        .unwrap()
-        .last_child()
-        .unwrap()
-        .downcast()
-        .unwrap();
-    let last_child = stack.last_child().unwrap();
-    stack.remove(&last_child);
-
-    stack.add_named(&variant_grid, Some("🔄 Variants"));
+    // something here is causing a segfault...
+    let _variant_grid = build_grid(skin_tones_iter);
+    // let stack: Stack = WINDOW
+    //     .get()
+    //     .unwrap()
+    //     .0
+    //     .child()
+    //     .unwrap()
+    //     .last_child()
+    //     .unwrap()
+    //     .downcast()
+    //     .unwrap();
+    // let last_child = stack.last_child().unwrap();
+    // stack.remove(&last_child);
+    //
+    // stack.add_named(&variant_grid, Some("🔄 Variants"));
 }
 
 fn load_css() {

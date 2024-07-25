@@ -5,7 +5,7 @@ edition = "2021"
 license = "MPL-2.0"
 description = "Simple emoji picker."
 repository = "https://github.com/Lamby777/windot/"
-keywords = ["emoji", "picker", "gtk", "clipboard", "rust"]
+keywords = ["emoji", "picker", "gtk", "clipboard"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

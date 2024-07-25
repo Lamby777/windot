@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
-use std::sync::{OnceLock, RwLock};
+use std::rc::Rc;
+use std::sync::RwLock;
 
 use emojis::Emoji;
 use gtk::prelude::*;
@@ -17,14 +18,7 @@ use components::*;
 use config::*;
 use consts::*;
 
-static WINDOW: OnceLock<SApplicationWindow> = OnceLock::new();
 static CONFIG: RwLock<Option<Config>> = RwLock::new(None);
-
-/// Wrapper around `ApplicationWindow` to implement `Send` and `Sync`.
-#[derive(Debug)]
-struct SApplicationWindow(ApplicationWindow);
-unsafe impl Sync for SApplicationWindow {}
-unsafe impl Send for SApplicationWindow {}
 
 fn main() -> glib::ExitCode {
     // make the user data folder
@@ -42,7 +36,7 @@ fn main() -> glib::ExitCode {
     app.run()
 }
 
-fn on_emoji_picked(button: &Button) {
+fn on_emoji_picked(button: &Button, window: &ApplicationWindow) {
     let emoji = button.label().unwrap();
     println!("Picked: {}", emoji);
     cli_clipboard::set_contents(emoji.to_string()).unwrap();
@@ -58,10 +52,10 @@ fn on_emoji_picked(button: &Button) {
 
     println!("Closing...");
     conf.save();
-    WINDOW.get().unwrap().0.close();
+    window.close();
 }
 
-fn on_variants_request(button: &Button) {
+fn on_variants_request(button: &Button, window: &Rc<ApplicationWindow>) {
     let emoji = button.label().unwrap();
     println!("Requesting Variants: {}", emoji);
 
@@ -73,7 +67,7 @@ fn on_variants_request(button: &Button) {
     };
 
     // something here is causing a segfault...
-    let _variant_grid = build_grid(skin_tones_iter);
+    let _variant_grid = build_grid(window.clone(), skin_tones_iter);
     // let stack: Stack = WINDOW
     //     .get()
     //     .unwrap()
@@ -102,6 +96,14 @@ fn load_css() {
 }
 
 fn build_ui(app: &Application) {
+    // Create a window
+    let window = Rc::new(
+        ApplicationWindow::builder()
+            .application(app)
+            .title("Select an emoji.")
+            .build(),
+    );
+
     let main_box = gtk::Box::builder()
         .spacing(10)
         .margin_top(10)
@@ -122,7 +124,7 @@ fn build_ui(app: &Application) {
 
     // build the "search" stack
     let search_pane = {
-        let search = build_search();
+        let search = build_search(window.clone());
         let name = "🔎 Search";
         stack.add_titled(&search, Some(&name), &name);
         search
@@ -131,6 +133,7 @@ fn build_ui(app: &Application) {
     // build the "search" stack
     {
         let search = build_grid(
+            window.clone(),
             CONFIG
                 .read()
                 .unwrap()
@@ -146,7 +149,10 @@ fn build_ui(app: &Application) {
 
     // build the group stacks
     for group in GROUPS {
-        let grid = build_grid(all_emojis().filter(|e| e.group() == *group));
+        let grid = build_grid(
+            window.clone(),
+            all_emojis().filter(|e| e.group() == *group),
+        );
         let name = group_display_name(*group);
         stack.add_titled(&grid, Some(&name), &name);
     }
@@ -154,18 +160,11 @@ fn build_ui(app: &Application) {
     main_box.append(&sidebar);
     main_box.append(&stack);
 
-    // Create a window
-    let window = ApplicationWindow::builder()
-        .application(app)
-        .title("Select an emoji.")
-        .child(&main_box)
-        .build();
-
     search_pane.first_child().unwrap().grab_focus();
 
     // Present window
+    window.set_child(Some(&main_box));
     window.present();
-    WINDOW.set(SApplicationWindow(window)).unwrap();
 }
 
 // getter in case i gotta change this later

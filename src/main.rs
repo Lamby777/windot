@@ -45,7 +45,7 @@ fn on_emoji_picked(button: &Button, window: &ApplicationWindow) {
     let conf = conf.as_mut().unwrap();
 
     // push to recents
-    let emoji = emojis::iter().find(|e| **e == *emoji).unwrap();
+    let emoji = every_emoji_and_variants().find(|e| **e == *emoji).unwrap();
     if !conf.recent_emojis.contains(&emoji) {
         conf.recent_emojis.push(emoji);
     }
@@ -59,14 +59,12 @@ fn on_variants_request(button: &Button, window: &Rc<ApplicationWindow>) {
     let emoji = button.label().unwrap();
     println!("Requesting Variants: {}", emoji);
 
-    // push to recents
     let emoji = emojis::iter().find(|e| **e == *emoji).unwrap();
     let Some(skin_tones_iter) = emoji.skin_tones() else {
         println!("No variants, returning.");
         return;
     };
 
-    // something here is causing a segfault...
     let variant_grid = build_grid(window.clone(), skin_tones_iter);
     let stack: Stack = window
         .child()
@@ -75,10 +73,9 @@ fn on_variants_request(button: &Button, window: &Rc<ApplicationWindow>) {
         .unwrap()
         .downcast()
         .unwrap();
-    let last_child = stack.last_child().unwrap();
-    stack.remove(&last_child);
 
     stack.add_named(&variant_grid, Some("🔄 Variants"));
+    stack.set_visible_child(&variant_grid);
 }
 
 fn load_css() {
@@ -167,4 +164,10 @@ fn build_ui(app: &Application) {
 // getter in case i gotta change this later
 fn all_emojis() -> impl Iterator<Item = &'static Emoji> {
     emojis::iter()
+}
+
+fn every_emoji_and_variants() -> impl Iterator<Item = &'static Emoji> {
+    all_emojis()
+        .into_iter()
+        .flat_map(|e| e.skin_tones().into_iter().flatten())
 }

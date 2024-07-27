@@ -59,7 +59,7 @@ fn on_variants_request(button: &Button, window: &Rc<ApplicationWindow>) {
     let emoji = button.label().unwrap();
     println!("Requesting Variants: {}", emoji);
 
-    let emoji = emojis::iter().find(|e| **e == *emoji).unwrap();
+    let emoji = every_emoji_and_variants().find(|e| **e == *emoji).unwrap();
     let Some(skin_tones_iter) = emoji.skin_tones() else {
         println!("No variants, returning.");
         return;
@@ -74,8 +74,15 @@ fn on_variants_request(button: &Button, window: &Rc<ApplicationWindow>) {
         .downcast()
         .unwrap();
 
-    stack.add_named(&variant_grid, Some("🔄 Variants"));
-    stack.set_visible_child(&variant_grid);
+    let variants = stack
+        .child_by_name("Variants")
+        .unwrap()
+        .downcast::<gtk::Box>()
+        .unwrap();
+
+    variants.append(&variant_grid);
+
+    stack.set_visible_child_name("Variants");
 }
 
 fn load_css() {
@@ -140,6 +147,22 @@ fn build_ui(app: &Application) {
         let name = "🕒 Recents";
         stack.add_titled(&search, Some(&name), &name);
     };
+
+    {
+        let variant_box = gtk::Box::builder()
+            .orientation(Orientation::Vertical)
+            .spacing(10)
+            .margin_top(10)
+            .margin_bottom(10)
+            .margin_start(10)
+            .margin_end(10)
+            .build();
+
+        let label = gtk::Label::builder().label("Variants").build();
+        variant_box.append(&label);
+
+        stack.add_named(&variant_box, Some("Variants"));
+    }
 
     // build the group stacks
     for group in GROUPS {

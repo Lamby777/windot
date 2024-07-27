@@ -62,7 +62,8 @@ pub fn build_grid(
         .hscrollbar_policy(gtk::PolicyType::Never)
         .vscrollbar_policy(gtk::PolicyType::Automatic)
         .width_request(500)
-        .height_request(400)
+        // .height_request(400)
+        .vexpand(true)
         .child(&grid)
         .build()
 }

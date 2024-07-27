@@ -3,11 +3,12 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::RwLock;
 
+use adw::Application;
 use emojis::Emoji;
 use gtk::prelude::*;
 use gtk::{
-    glib, Application, ApplicationWindow, Button, CssProvider, Grid,
-    Orientation, ScrolledWindow, SearchEntry, Stack, StackSidebar,
+    glib, ApplicationWindow, Button, CssProvider, Grid, Orientation,
+    ScrolledWindow, SearchEntry, Stack, StackSidebar,
 };
 
 mod components;

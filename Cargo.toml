@@ -16,3 +16,4 @@ gtk = { version = "0.9.0", package = "gtk4", features = ["v4_14"] }
 serde = { version = "1.0.204", features = ["derive"] }
 emojis = { version = "0.6.3", features = ["serde"] }
 serde_json = "1.0.120"
+adw = { version = "0.7.0", package = "libadwaita", features = ["v1_5"] }

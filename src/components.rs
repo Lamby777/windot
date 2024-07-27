@@ -35,10 +35,6 @@ pub fn build_grid(
 ) -> ScrolledWindow {
     let grid = Grid::builder()
         .column_spacing(10)
-        .margin_top(10)
-        .margin_bottom(10)
-        .margin_start(10)
-        .margin_end(10)
         .row_homogeneous(true)
         .column_homogeneous(true)
         .build();
@@ -61,6 +57,10 @@ pub fn build_grid(
     ScrolledWindow::builder()
         .hscrollbar_policy(gtk::PolicyType::Never)
         .vscrollbar_policy(gtk::PolicyType::Automatic)
+        .margin_top(10)
+        .margin_bottom(10)
+        .margin_start(10)
+        .margin_end(10)
         .width_request(500)
         // .height_request(400)
         .vexpand(true)

@@ -120,6 +120,7 @@ fn build_ui(app: &Application) {
         .build();
     let sidebar = StackSidebar::builder()
         .width_request(200)
+        .height_request(500)
         .stack(&stack)
         .build();
 
@@ -158,7 +159,10 @@ fn build_ui(app: &Application) {
             .margin_end(10)
             .build();
 
-        let label = gtk::Label::builder().label("Variants").build();
+        let label = gtk::Label::builder()
+            .label("Variants")
+            .name("variants-title")
+            .build();
         variant_box.append(&label);
 
         stack.add_named(&variant_box, Some("Variants"));

@@ -192,11 +192,11 @@ fn build_ui(app: &Application) {
     main_box.append(&sidebar);
     main_box.append(&stack);
 
-    search_pane.first_child().unwrap().grab_focus();
-
     // Present window
     window.set_child(Some(&main_box));
     window.present();
+
+    search_pane.first_child().unwrap().grab_focus();
 
     window.connect_close_request(|_| {
         CONFIG.read().unwrap().as_ref().unwrap().save();

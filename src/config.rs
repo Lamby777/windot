@@ -34,7 +34,7 @@ impl Config {
 
     pub fn load(path: &Path) -> Self {
         let config_file = fs::read_to_string(path).unwrap();
-        serde_json::from_str(&config_file).unwrap()
+        dbg!(serde_json::from_str(&config_file).unwrap())
     }
 
     pub fn save(&self) {

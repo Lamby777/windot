@@ -86,7 +86,7 @@ pub fn build_search(window: Rc<ApplicationWindow>) -> gtk::Box {
         .orientation(Orientation::Vertical)
         .build();
 
-    let grid = build_grid(window.clone(), all_emojis());
+    let grid = build_grid(window.clone(), all_emojis_in_preferred_tone());
 
     let searchbox = SearchEntry::builder().build();
 
@@ -99,8 +99,11 @@ pub fn build_search(window: Rc<ApplicationWindow>) -> gtk::Box {
 
         parent.append(&build_grid(
             window.clone(),
-            all_emojis().filter(|e| {
-                e.shortcodes().any(|sc| sc.contains(&sb.text().to_string()))
+            all_emojis_in_preferred_tone().filter(|e| {
+                e.with_skin_tone(SkinTone::Default)
+                    .unwrap_or(e)
+                    .shortcodes()
+                    .any(|sc| sc.contains(&sb.text().to_string()))
             }),
         ));
     });

@@ -42,17 +42,18 @@ fn on_emoji_picked(button: &Button, window: &ApplicationWindow) {
     println!("Picked: {}", emoji);
     cli_clipboard::set_contents(emoji.to_string()).unwrap();
 
-    let mut conf = CONFIG.write().unwrap();
-    let conf = conf.as_mut().unwrap();
+    {
+        let mut conf = CONFIG.write().unwrap();
+        let conf = conf.as_mut().unwrap();
 
-    // push to recents
-    let emoji = every_emoji_and_variants().find(|e| **e == *emoji).unwrap();
-    if !conf.recent_emojis.contains(&emoji) {
-        conf.recent_emojis.push(emoji);
+        // push to recents
+        let emoji = every_emoji_and_variants().find(|e| **e == *emoji).unwrap();
+        if !conf.recent_emojis.contains(&emoji) {
+            conf.recent_emojis.push(emoji);
+        }
     }
 
     println!("Closing...");
-    conf.save();
     window.close();
 }
 
@@ -174,7 +175,7 @@ fn build_ui(app: &Application) {
     for group in GROUPS {
         let grid = build_grid(
             window.clone(),
-            all_emojis().filter(|e| e.group() == *group),
+            all_emojis_in_preferred_tone().filter(|e| e.group() == *group),
         );
         let name = group_display_name(*group);
         stack.add_titled(&grid, Some(&name), &name);
@@ -204,13 +205,15 @@ fn build_ui(app: &Application) {
     });
 }
 
-// getter in case i gotta change this later
-fn all_emojis() -> impl Iterator<Item = &'static Emoji> {
-    emojis::iter()
+fn all_emojis_in_preferred_tone() -> impl Iterator<Item = &'static Emoji> {
+    let preferred_tone =
+        CONFIG.read().unwrap().as_ref().unwrap().preferred_skin_tone;
+
+    emojis::iter().map(move |e| e.with_skin_tone(preferred_tone).unwrap_or(e))
 }
 
 fn every_emoji_and_variants() -> impl Iterator<Item = &'static Emoji> {
-    all_emojis()
+    emojis::iter()
         .into_iter()
         .flat_map(|e| e.skin_tones().into_iter().flatten())
 }

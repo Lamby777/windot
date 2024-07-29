@@ -47,24 +47,46 @@ pub fn build_settings() -> gtk::Box {
 
     for tone in PREFERRABLE_SKIN_TONES {
         let emoji = emojis::get("👋").unwrap().with_skin_tone(*tone).unwrap();
-        let button = Button::builder().label(emoji.to_string()).build();
+        let btn = Button::builder().label(emoji.to_string()).build();
 
-        button.connect_clicked(|_| {
+        btn.connect_clicked(|_| {
             let mut conf = CONFIG.write().unwrap();
             let conf = conf.as_mut().unwrap();
             conf.preferred_skin_tone = *tone;
             conf.save();
         });
 
-        skin_tones_box.append(&button);
+        skin_tones_box.append(&btn);
     }
 
     skin_tones_setting_box.append(&skin_tones_box_label);
     skin_tones_setting_box.append(&skin_tones_box);
 
+    let clear_box = gtk::Box::builder().hexpand(true).build();
+    let clear_label = gtk::Label::builder()
+        .label("Clear Recent Emojis")
+        .name("clear-recents")
+        .build();
+    let clear_btn = Button::builder()
+        .label("CLEAR")
+        .halign(Align::End)
+        .hexpand(true)
+        .build();
+
+    clear_box.append(&clear_label);
+    clear_box.append(&clear_btn);
+
+    let settings_box = gtk::Box::builder()
+        .orientation(Orientation::Vertical)
+        .spacing(10)
+        .build();
+
+    settings_box.append(&skin_tones_setting_box);
+    settings_box.append(&clear_box);
+
     stack.append(&settings_label);
     stack.append(&sep);
-    stack.append(&skin_tones_setting_box);
+    stack.append(&settings_box);
 
     stack
 }

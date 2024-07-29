@@ -53,7 +53,6 @@ pub fn build_settings() -> gtk::Box {
             let mut conf = CONFIG.write().unwrap();
             let conf = conf.as_mut().unwrap();
             conf.preferred_skin_tone = *tone;
-            conf.save();
         });
 
         skin_tones_box.append(&btn);
@@ -75,6 +74,12 @@ pub fn build_settings() -> gtk::Box {
 
     clear_box.append(&clear_label);
     clear_box.append(&clear_btn);
+
+    clear_btn.connect_clicked(|_| {
+        let mut conf = CONFIG.write().unwrap();
+        let conf = conf.as_mut().unwrap();
+        conf.recent_emojis.clear();
+    });
 
     let settings_box = gtk::Box::builder()
         .orientation(Orientation::Vertical)

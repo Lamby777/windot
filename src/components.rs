@@ -66,18 +66,6 @@ pub fn build_settings() -> gtk::Box {
     stack.append(&sep);
     stack.append(&skin_tones_setting_box);
 
-    // let save_btn = Button::builder()
-    //     .label("Save")
-    //     .name("save-btn")
-    //     .margin_top(10)
-    //     .build();
-    // stack.append(&save_btn);
-    // save_btn.connect_clicked(|_| {
-    //     let mut conf = CONFIG.write().unwrap();
-    //     let conf = conf.as_mut().unwrap();
-    //     conf.save();
-    // });
-
     stack
 }
 

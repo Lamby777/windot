@@ -1,5 +1,7 @@
 use std::rc::Rc;
 
+use gtk::{Align, Separator};
+
 use super::*;
 
 /// Includes all the single-person skin tones.
@@ -20,13 +22,61 @@ pub fn build_settings(window: Rc<ApplicationWindow>) -> gtk::Box {
         .orientation(Orientation::Vertical)
         .build();
 
-    let label = gtk::Label::builder()
+    let settings_label = gtk::Label::builder()
         .label("Settings")
         .name("settings-title")
         .build();
 
-    // let grid = build_grid(window.clone(), );
-    stack.append(&label);
+    let sep = Separator::builder()
+        .orientation(Orientation::Horizontal)
+        .margin_top(5)
+        .margin_bottom(10)
+        .build();
+
+    let skin_tones_setting_box = gtk::Box::builder().hexpand(true).build();
+    let skin_tones_box_label = gtk::Label::builder()
+        .label("Preferred Skin Tone")
+        .name("preferred-skin-tone")
+        .build();
+    let skin_tones_box = gtk::Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(10)
+        .hexpand(true)
+        .halign(Align::End)
+        .build();
+
+    for tone in PREFERRABLE_SKIN_TONES {
+        let emoji = emojis::get("👋").unwrap().with_skin_tone(*tone).unwrap();
+        let button = Button::builder().label(emoji.to_string()).build();
+
+        button.connect_clicked(|_| {
+            let mut conf = CONFIG.write().unwrap();
+            let conf = conf.as_mut().unwrap();
+            conf.preferred_skin_tone = *tone;
+            conf.save();
+        });
+
+        skin_tones_box.append(&button);
+    }
+
+    skin_tones_setting_box.append(&skin_tones_box_label);
+    skin_tones_setting_box.append(&skin_tones_box);
+
+    stack.append(&settings_label);
+    stack.append(&sep);
+    stack.append(&skin_tones_setting_box);
+
+    // let save_btn = Button::builder()
+    //     .label("Save")
+    //     .name("save-btn")
+    //     .margin_top(10)
+    //     .build();
+    // stack.append(&save_btn);
+    // save_btn.connect_clicked(|_| {
+    //     let mut conf = CONFIG.write().unwrap();
+    //     let conf = conf.as_mut().unwrap();
+    //     conf.save();
+    // });
 
     stack
 }

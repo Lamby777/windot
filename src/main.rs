@@ -181,7 +181,7 @@ fn build_ui(app: &Application) {
     }
 
     // build the "settings" stack
-    let search_pane = {
+    {
         let search = build_settings(window.clone());
         let name = "⚙️ Settings";
         stack.add_titled(&search, Some(&name), &name);

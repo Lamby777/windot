@@ -196,6 +196,12 @@ fn build_ui(app: &Application) {
     // Present window
     window.set_child(Some(&main_box));
     window.present();
+
+    window.connect_close_request(|_| {
+        CONFIG.read().unwrap().as_ref().unwrap().save();
+
+        glib::Propagation::Proceed
+    });
 }
 
 // getter in case i gotta change this later

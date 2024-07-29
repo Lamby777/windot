@@ -2,6 +2,35 @@ use std::rc::Rc;
 
 use super::*;
 
+/// Includes all the single-person skin tones.
+///
+/// For multiple people, the default skin tone is shown and the variant
+/// should be picked manually.
+const PREFERRABLE_SKIN_TONES: &[SkinTone] = &[
+    SkinTone::Default,
+    SkinTone::Light,
+    SkinTone::MediumLight,
+    SkinTone::Medium,
+    SkinTone::MediumDark,
+    SkinTone::Dark,
+];
+
+pub fn build_settings(window: Rc<ApplicationWindow>) -> gtk::Box {
+    let stack = gtk::Box::builder()
+        .orientation(Orientation::Vertical)
+        .build();
+
+    let label = gtk::Label::builder()
+        .label("Settings")
+        .name("settings-title")
+        .build();
+
+    // let grid = build_grid(window.clone(), );
+    stack.append(&label);
+
+    stack
+}
+
 pub fn build_search(window: Rc<ApplicationWindow>) -> gtk::Box {
     let stack = gtk::Box::builder()
         .orientation(Orientation::Vertical)

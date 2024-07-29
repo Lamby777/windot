@@ -4,7 +4,7 @@ use std::rc::Rc;
 use std::sync::RwLock;
 
 use adw::Application;
-use emojis::Emoji;
+use emojis::{Emoji, SkinTone};
 use gtk::prelude::*;
 use gtk::{
     glib, ApplicationWindow, Button, CssProvider, Grid, Orientation,
@@ -133,7 +133,7 @@ fn build_ui(app: &Application) {
         search
     };
 
-    // build the "search" stack
+    // build the "recents" stack
     {
         let search = build_grid(
             window.clone(),
@@ -150,6 +150,7 @@ fn build_ui(app: &Application) {
         stack.add_titled(&search, Some(&name), &name);
     };
 
+    // the invisible "variants" stack
     {
         let variant_box = gtk::Box::builder()
             .orientation(Orientation::Vertical)
@@ -178,6 +179,14 @@ fn build_ui(app: &Application) {
         let name = group_display_name(*group);
         stack.add_titled(&grid, Some(&name), &name);
     }
+
+    // build the "settings" stack
+    let search_pane = {
+        let search = build_settings(window.clone());
+        let name = "⚙️ Settings";
+        stack.add_titled(&search, Some(&name), &name);
+        search
+    };
 
     main_box.append(&sidebar);
     main_box.append(&stack);

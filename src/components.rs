@@ -17,7 +17,7 @@ const PREFERRABLE_SKIN_TONES: &[SkinTone] = &[
     SkinTone::Dark,
 ];
 
-pub fn build_settings(window: Rc<ApplicationWindow>) -> gtk::Box {
+pub fn build_settings() -> gtk::Box {
     let stack = gtk::Box::builder()
         .orientation(Orientation::Vertical)
         .build();

@@ -182,7 +182,7 @@ fn build_ui(app: &Application) {
 
     // build the "settings" stack
     {
-        let search = build_settings(window.clone());
+        let search = build_settings();
         let name = "⚙️ Settings";
         stack.add_titled(&search, Some(&name), &name);
         search

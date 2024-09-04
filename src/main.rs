@@ -213,13 +213,11 @@ fn all_emojis_in_preferred_tone() -> impl Iterator<Item = &'static Emoji> {
 }
 
 fn every_emoji_and_variants() -> impl Iterator<Item = &'static Emoji> {
-    emojis::iter().into_iter().flat_map(|e| {
+    emojis::iter().flat_map(|e| {
         // skin_tones returns None if there are no skin tones, so we need to
         // return the emoji itself in that case. BUT skin_tones also contains
         // the default emoji skin tone as well, so we can't just chain it on
-
         let tones = e.skin_tones();
-
         let default = std::iter::once(e);
 
         let mut tones_only = tones.into_iter().flatten();

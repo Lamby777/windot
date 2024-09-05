@@ -41,7 +41,7 @@ pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
     let search_pane = {
         let search = build_search(window.clone());
         let name = "🔎 Search";
-        stack.add_titled(&search, Some(&name), &name);
+        stack.add_titled(&search, Some(name), name);
         search
     };
 
@@ -59,7 +59,7 @@ pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
                 .into_iter(),
         );
         let name = "🕒 Recents";
-        stack.add_titled(&search, Some(&name), &name);
+        stack.add_titled(&search, Some(name), name);
     };
 
     // the invisible "variants" stack
@@ -89,14 +89,14 @@ pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
             all_emojis_in_preferred_tone().filter(|e| e.group() == *group),
         );
         let name = group_display_name(*group);
-        stack.add_titled(&grid, Some(&name), &name);
+        stack.add_titled(&grid, Some(name), name);
     }
 
     // build the "settings" stack
     {
         let search = build_settings();
         let name = "⚙️ Settings";
-        stack.add_titled(&search, Some(&name), &name);
+        stack.add_titled(&search, Some(name), name);
         search
     };
 

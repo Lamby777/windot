@@ -3,7 +3,6 @@
 
 use std::fs;
 use std::path::PathBuf;
-use std::rc::Rc;
 use std::sync::RwLock;
 
 use adw::Application;
@@ -60,7 +59,7 @@ fn on_emoji_picked(button: &Button, window: &ApplicationWindow) {
     window.close();
 }
 
-fn on_variants_request(button: &Button, window: &Rc<ApplicationWindow>) {
+fn on_variants_request(button: &Button, window: &ApplicationWindow) {
     let emoji = button.label().unwrap();
     println!("Requesting Variants: {emoji}");
 
@@ -103,12 +102,11 @@ fn load_css() {
 
 fn build_window(app: &Application) {
     // Create a window
-    let window = Rc::new(
-        ApplicationWindow::builder()
-            .application(app)
-            .title("Select an emoji.")
-            .build(),
-    );
+    let window = ApplicationWindow::builder()
+        .application(app)
+        .title("Select an emoji.")
+        .build()
+        .clone();
 
     // Present window
     let main_box = build_main_box(&window);

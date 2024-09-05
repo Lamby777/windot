@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use gtk::prelude::*;
 use gtk::{Align, Separator};
 
@@ -20,12 +18,12 @@ const PREFERRABLE_SKIN_TONES: &[SkinTone] = &[
 
 /// Run this after changing any config values.
 /// It will rebuild the whole UI again and show it with the new settings in mind.
-pub fn reapply_main_box(window: &Rc<ApplicationWindow>) {
+pub fn reapply_main_box(window: &ApplicationWindow) {
     let main_box = build_main_box(&window);
     window.set_child(Some(&main_box));
 }
 
-pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
+pub fn build_main_box(window: &ApplicationWindow) -> gtk::Box {
     let main_box = gtk::Box::builder()
         .spacing(10)
         .margin_top(10)
@@ -116,7 +114,7 @@ pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
     main_box
 }
 
-pub fn build_settings(window: &Rc<ApplicationWindow>) -> gtk::Box {
+pub fn build_settings(window: &ApplicationWindow) -> gtk::Box {
     let stack = gtk::Box::builder()
         .orientation(Orientation::Vertical)
         .build();
@@ -204,7 +202,7 @@ pub fn build_settings(window: &Rc<ApplicationWindow>) -> gtk::Box {
     stack
 }
 
-pub fn build_search(window: Rc<ApplicationWindow>) -> gtk::Box {
+pub fn build_search(window: ApplicationWindow) -> gtk::Box {
     let stack = gtk::Box::builder()
         .orientation(Orientation::Vertical)
         .build();
@@ -235,7 +233,7 @@ pub fn build_search(window: Rc<ApplicationWindow>) -> gtk::Box {
 }
 
 pub fn build_grid(
-    window: &Rc<ApplicationWindow>,
+    window: &ApplicationWindow,
     emojis: impl Iterator<Item = &'static Emoji>,
 ) -> ScrolledWindow {
     let grid = Grid::builder()
@@ -248,8 +246,8 @@ pub fn build_grid(
     let mut col = 0;
 
     for emoji in emojis {
-        let button = make_button(emoji, window.clone());
-        grid.attach(&*button, col, row, 1, 1);
+        let button = make_button(emoji, window);
+        grid.attach(&button, col, row, 1, 1);
 
         col += 1;
 
@@ -273,20 +271,18 @@ pub fn build_grid(
         .build()
 }
 
-fn make_button(
-    emoji: &'static Emoji,
-    window: Rc<ApplicationWindow>,
-) -> Rc<Button> {
-    let button = Rc::new(Button::builder().label(emoji.to_string()).build());
+fn make_button(emoji: &'static Emoji, window: &ApplicationWindow) -> Button {
+    let button = Button::builder().label(emoji.to_string()).build();
 
     let window2 = window.clone();
-    button.connect_clicked(move |b| on_emoji_picked(b, &window));
+    button.connect_clicked(move |b| on_emoji_picked(b, &window2));
 
     // if right click, show variants
     let gesture = gtk::GestureClick::new();
     gesture.set_button(gtk::gdk::ffi::GDK_BUTTON_SECONDARY as u32);
 
     let button2 = button.clone();
+    let window2 = window.clone();
     gesture.connect_pressed(move |gesture, _, _, _| {
         gesture.set_state(gtk::EventSequenceState::Claimed);
         on_variants_request(&button2, &window2);

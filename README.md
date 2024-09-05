@@ -11,14 +11,11 @@ It has the following features you might be looking for in an emoji picker:
 
 ### More Features?
 
-Check [the Issues tab](https://github.com/Lamby777/windot/issues).
-I kinda use it as a to-do list.
+Check [the Issues tab][issues]. I kinda use it as a to-do list.
 
-## How to use it?
+## Installation
 
-- Install the program and make sure you can run it from command line.
-- Use your system's shortcuts feature to bind a key combo to run that command.
-- All done! Now you can use the shortcut to open the emoji picker.
+A brief installation guide is included in [this blog post][blog-post].
 
 ## Contributions
 
@@ -30,3 +27,6 @@ Yes.
   - It's pronounced "who the hell cares how it's pronounced"
 - I created this project to learn GTK and to make my own little emoji picker
   because Emote wouldn't register my clicks sometimes for some reason.
+
+[issues]: https://github.com/Lamby777/windot/issues
+[blog-post]: https://blog.sparklet.org/posts/windot-release/#installation

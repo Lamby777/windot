@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=windot
+GenericName=Emoji Picker
+
+Comment=Simple emoji picker
+
+Exec=windot
+Icon=windot
+Terminal=false
+Categories=System;
+X-Desktop-File-Install-Version=0.27

@@ -1,4 +1,5 @@
 #![warn(clippy::pedantic)]
+#![allow(clippy::wildcard_imports)]
 
 use std::fs;
 use std::path::PathBuf;

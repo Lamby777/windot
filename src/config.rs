@@ -9,6 +9,7 @@ pub fn user_data_dir() -> PathBuf {
     dirs::data_dir().unwrap().join(APP_ID)
 }
 
+#[allow(clippy::module_name_repetitions)]
 pub fn config_file_path() -> PathBuf {
     user_data_dir().join("state.json")
 }
@@ -23,12 +24,12 @@ impl Config {
     pub fn load_or_create() -> Self {
         let config_path = config_file_path();
 
-        if !config_path.exists() {
+        if config_path.exists() {
+            Self::load(&config_path)
+        } else {
             let config = Self::default();
             config.save();
             config
-        } else {
-            Self::load(&config_path)
         }
     }
 

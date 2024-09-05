@@ -49,7 +49,7 @@ pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
     // build the "recents" stack
     {
         let search = build_grid(
-            &window,
+            window,
             CONFIG
                 .read()
                 .unwrap()
@@ -86,7 +86,7 @@ pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
     // build the group stacks
     for group in GROUPS {
         let grid = build_grid(
-            &window,
+            window,
             all_emojis_in_preferred_tone().filter(|e| e.group() == *group),
         );
         let name = group_display_name(*group);
@@ -273,7 +273,7 @@ fn make_button(
     let button2 = button.clone();
     gesture.connect_pressed(move |gesture, _, _, _| {
         gesture.set_state(gtk::EventSequenceState::Claimed);
-        on_variants_request(&button2, &window2)
+        on_variants_request(&button2, &window2);
     });
     button.add_controller(gesture);
 

@@ -7,8 +7,8 @@ build:
 
 install:
 	install -Dm755 target/release/windot /usr/local/bin/windot
-	desktop-file-install ./windot.desktop
-	install -Dm644 icon.png /usr/share/icons/hicolor/64x64/apps/windot.png
+	desktop-file-install meta/windot.desktop
+	install -Dm644 meta/icon.png /usr/share/icons/hicolor/64x64/apps/windot.png
 
 uninstall:
 	rm /usr/local/bin/windot

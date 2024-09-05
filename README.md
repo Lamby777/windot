@@ -15,6 +15,7 @@ Check [the Issues tab][issues]. I kinda use it as a to-do list.
 
 ## Installation
 
+You may have dependency issues if you just compile it immediately.
 A brief installation guide is included in [this blog post][blog-post].
 
 ## Contributions

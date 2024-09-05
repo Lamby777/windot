@@ -18,6 +18,13 @@ const PREFERRABLE_SKIN_TONES: &[SkinTone] = &[
     SkinTone::Dark,
 ];
 
+/// Run this after changing any config values.
+/// It will rebuild the whole UI again and show it with the new settings in mind.
+pub fn reapply_main_box(window: &Rc<ApplicationWindow>) {
+    let main_box = build_main_box(&window);
+    window.set_child(Some(&main_box));
+}
+
 pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
     let main_box = gtk::Box::builder()
         .spacing(10)
@@ -95,7 +102,7 @@ pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
 
     // build the "settings" stack
     {
-        let search = build_settings();
+        let search = build_settings(window);
         let name = "⚙️ Settings";
         stack.add_titled(&search, Some(name), name);
         search
@@ -109,7 +116,7 @@ pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
     main_box
 }
 
-pub fn build_settings() -> gtk::Box {
+pub fn build_settings(window: &Rc<ApplicationWindow>) -> gtk::Box {
     let stack = gtk::Box::builder()
         .orientation(Orientation::Vertical)
         .build();
@@ -141,10 +148,15 @@ pub fn build_settings() -> gtk::Box {
         let emoji = emojis::get("👋").unwrap().with_skin_tone(*tone).unwrap();
         let btn = Button::builder().label(emoji.to_string()).build();
 
-        btn.connect_clicked(|_| {
-            let mut conf = CONFIG.write().unwrap();
-            let conf = conf.as_mut().unwrap();
-            conf.preferred_skin_tone = *tone;
+        let window2 = window.clone();
+        btn.connect_clicked(move |_| {
+            {
+                let mut conf = CONFIG.write().unwrap();
+                let conf = conf.as_mut().unwrap();
+                conf.preferred_skin_tone = *tone;
+            }
+
+            reapply_main_box(&window2);
         });
 
         skin_tones_box.append(&btn);
@@ -167,10 +179,14 @@ pub fn build_settings() -> gtk::Box {
     clear_box.append(&clear_label);
     clear_box.append(&clear_btn);
 
-    clear_btn.connect_clicked(|_| {
-        let mut conf = CONFIG.write().unwrap();
-        let conf = conf.as_mut().unwrap();
-        conf.recent_emojis.clear();
+    let window2 = window.clone();
+    clear_btn.connect_clicked(move |_| {
+        {
+            let mut conf = CONFIG.write().unwrap();
+            let conf = conf.as_mut().unwrap();
+            conf.recent_emojis.clear();
+        }
+        reapply_main_box(&window2);
     });
 
     let settings_box = gtk::Box::builder()

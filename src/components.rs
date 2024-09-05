@@ -17,6 +17,97 @@ const PREFERRABLE_SKIN_TONES: &[SkinTone] = &[
     SkinTone::Dark,
 ];
 
+pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
+    let main_box = gtk::Box::builder()
+        .spacing(10)
+        .margin_top(10)
+        .margin_bottom(10)
+        .margin_start(10)
+        .margin_end(10)
+        .orientation(Orientation::Horizontal)
+        .build();
+
+    let stack = Stack::builder()
+        .height_request(400)
+        .vhomogeneous(false)
+        .build();
+    let sidebar = StackSidebar::builder()
+        .width_request(200)
+        .height_request(500)
+        .stack(&stack)
+        .build();
+
+    // build the "search" stack
+    let search_pane = {
+        let search = build_search(window.clone());
+        let name = "🔎 Search";
+        stack.add_titled(&search, Some(&name), &name);
+        search
+    };
+
+    // build the "recents" stack
+    {
+        let search = build_grid(
+            window.clone(),
+            CONFIG
+                .read()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .recent_emojis
+                .clone()
+                .into_iter(),
+        );
+        let name = "🕒 Recents";
+        stack.add_titled(&search, Some(&name), &name);
+    };
+
+    // the invisible "variants" stack
+    {
+        let variant_box = gtk::Box::builder()
+            .orientation(Orientation::Vertical)
+            .spacing(10)
+            .margin_top(10)
+            .margin_bottom(10)
+            .margin_start(10)
+            .margin_end(10)
+            .build();
+
+        let label = gtk::Label::builder()
+            .label("Variants")
+            .name("variants-title")
+            .build();
+        variant_box.append(&label);
+
+        stack.add_named(&variant_box, Some("Variants"));
+    }
+
+    // build the group stacks
+    for group in GROUPS {
+        let grid = build_grid(
+            window.clone(),
+            all_emojis_in_preferred_tone().filter(|e| e.group() == *group),
+        );
+        let name = group_display_name(*group);
+        stack.add_titled(&grid, Some(&name), &name);
+    }
+
+    // build the "settings" stack
+    {
+        let search = build_settings();
+        let name = "⚙️ Settings";
+        stack.add_titled(&search, Some(&name), &name);
+        search
+    };
+
+    main_box.append(&sidebar);
+    main_box.append(&stack);
+
+    search_pane.first_child().unwrap().grab_focus();
+
+    main_box
+}
+
 pub fn build_settings() -> gtk::Box {
     let stack = gtk::Box::builder()
         .orientation(Orientation::Vertical)

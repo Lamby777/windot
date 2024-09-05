@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use std::fs;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -39,7 +41,7 @@ fn main() -> glib::ExitCode {
 
 fn on_emoji_picked(button: &Button, window: &ApplicationWindow) {
     let emoji = button.label().unwrap();
-    println!("Picked: {}", emoji);
+    println!("Picked: {emoji}");
     cli_clipboard::set_contents(emoji.to_string()).unwrap();
 
     {
@@ -59,7 +61,7 @@ fn on_emoji_picked(button: &Button, window: &ApplicationWindow) {
 
 fn on_variants_request(button: &Button, window: &Rc<ApplicationWindow>) {
     let emoji = button.label().unwrap();
-    println!("Requesting Variants: {}", emoji);
+    println!("Requesting Variants: {emoji}");
 
     let emoji = every_emoji_and_variants().find(|e| **e == *emoji).unwrap();
     let Some(skin_tones_iter) = emoji.skin_tones() else {
@@ -67,7 +69,7 @@ fn on_variants_request(button: &Button, window: &Rc<ApplicationWindow>) {
         return;
     };
 
-    let variant_grid = build_grid(window.clone(), skin_tones_iter);
+    let variant_grid = build_grid(window, skin_tones_iter);
     let stack: Stack = window
         .child()
         .unwrap()

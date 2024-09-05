@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use gtk::prelude::*;
 use gtk::{Align, Separator};
 
 use super::*;
@@ -48,7 +49,7 @@ pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
     // build the "recents" stack
     {
         let search = build_grid(
-            window.clone(),
+            &window,
             CONFIG
                 .read()
                 .unwrap()
@@ -85,7 +86,7 @@ pub fn build_main_box(window: &Rc<ApplicationWindow>) -> gtk::Box {
     // build the group stacks
     for group in GROUPS {
         let grid = build_grid(
-            window.clone(),
+            &window,
             all_emojis_in_preferred_tone().filter(|e| e.group() == *group),
         );
         let name = group_display_name(*group);
@@ -192,7 +193,7 @@ pub fn build_search(window: Rc<ApplicationWindow>) -> gtk::Box {
         .orientation(Orientation::Vertical)
         .build();
 
-    let grid = build_grid(window.clone(), all_emojis_in_preferred_tone());
+    let grid = build_grid(&window, all_emojis_in_preferred_tone());
 
     let searchbox = SearchEntry::builder().build();
 
@@ -204,7 +205,7 @@ pub fn build_search(window: Rc<ApplicationWindow>) -> gtk::Box {
         parent.remove(&parent.last_child().unwrap());
 
         parent.append(&build_grid(
-            window.clone(),
+            &window,
             all_emojis_in_preferred_tone().filter(|e| {
                 e.with_skin_tone(SkinTone::Default)
                     .unwrap_or(e)
@@ -218,7 +219,7 @@ pub fn build_search(window: Rc<ApplicationWindow>) -> gtk::Box {
 }
 
 pub fn build_grid(
-    window: Rc<ApplicationWindow>,
+    window: &Rc<ApplicationWindow>,
     emojis: impl Iterator<Item = &'static Emoji>,
 ) -> ScrolledWindow {
     let grid = Grid::builder()

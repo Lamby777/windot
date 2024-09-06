@@ -17,9 +17,9 @@ install:
 	install -Dm644 meta/org.sparklet.windot.desktop $(DESTDIR)$(datadir)/applications/org.sparklet.windot.desktop
 	
 	# Install the icon
-	install -Dm644 meta/icon.png $(DESTDIR)$(datadir)/icons/hicolor/64x64/apps/windot.png
+	install -Dm644 meta/icon.png $(DESTDIR)$(datadir)/icons/hicolor/48x48/apps/windot.png
 
 uninstall:
 	rm -f $(DESTDIR)$(bindir)/windot
-	rm -f $(DESTDIR)$(datadir)/icons/hicolor/64x64/apps/windot.png
+	rm -f $(DESTDIR)$(datadir)/icons/hicolor/48x48/apps/windot.png
 	rm -f $(DESTDIR)$(datadir)/applications/org.sparklet.windot.desktop

@@ -23,14 +23,15 @@ pkgver() {
     
     # use the latest commit's rev# and hash
     git_rev=$(git rev-list --count HEAD)
-    git_hash=$(git rev-parse --short HEAD)
     
     # requires the rev first for version sorting purposes
-    echo "$cargo_ver.r$git_rev.$git_hash"
+    echo "$cargo_ver.r$git_rev"
 }
 
 prepare() {
     cd "$srcdir/$_pkgname"
+
+    export RUSTUP_TOOLCHAIN=stable
     cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
 }
 

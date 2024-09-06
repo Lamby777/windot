@@ -10,18 +10,28 @@ pkgdesc="A simple emoji picker."
 md5sums=('SKIP')
 
 depends=('gtk4')
-makedepends=('gcc-libs' 'glibc' 'gcc' 'cargo' 'git' 'pkgconf' 'libadwaita')
+makedepends=('gcc' 'cargo' 'git' 'pkgconf' 'libadwaita')
+conflicts=('windot')
+provides=("windot=${pkgver}")
 
 # Fetch the current version using the latest commit hash
 pkgver() {
     cd "$srcdir/$_pkgname"
+
     # get the crate version using grep and sed
     cargo_ver=$(grep '^version =' Cargo.toml | sed -E 's/version = "(.*)"/\1/')
     
-    # use the latest commit hash
+    # use the latest commit's rev# and hash
+    git_rev=$(git rev-list --count HEAD)
     git_hash=$(git rev-parse --short HEAD)
     
-    echo "$cargo_ver.$git_hash"
+    # requires the rev first for version sorting purposes
+    echo "$cargo_ver.r$git_rev.$git_hash"
+}
+
+prepare() {
+    cd "$srcdir/$_pkgname"
+    cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
 }
 
 build() {
@@ -32,7 +42,6 @@ build() {
 package() {
     cd "$srcdir/$_pkgname"
     export RUSTUP_TOOLCHAIN=stable
-    cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
 
     make install DESTDIR="$pkgdir/" prefix="/usr"
 }

@@ -1,4 +1,5 @@
 # Maintainer: Cherry <arch@sparklet.org>
+# shellcheck disable=SC2034,SC2154
 _pkgname=windot
 pkgname=$_pkgname-git
 pkgver=0.2.1.58da11e

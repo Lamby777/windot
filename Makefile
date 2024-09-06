@@ -7,7 +7,7 @@ datadir ?= /usr/share
 all: build
 
 build:
-	cargo build --release
+	cargo build --release --locked
 
 install:
 	# Install the binary to the specified bin directory

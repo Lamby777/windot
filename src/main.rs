@@ -109,8 +109,7 @@ fn build_window(app: &Application) {
         .clone();
 
     // Present window
-    let main_box = build_main_box(&window);
-    window.set_child(Some(&main_box));
+    reapply_main_box(&window, true);
     window.present();
 
     window.connect_close_request(|_| {

@@ -18,12 +18,18 @@ const PREFERRABLE_SKIN_TONES: &[SkinTone] = &[
 
 /// Run this after changing any config values.
 /// It will rebuild the whole UI again and show it with the new settings in mind.
-pub fn reapply_main_box(window: &ApplicationWindow) {
-    let main_box = build_main_box(&window);
+pub fn reapply_main_box(window: &ApplicationWindow, focus_search: bool) {
+    let (main_box, search_box) = build_main_box(&window);
     window.set_child(Some(&main_box));
+
+    if focus_search {
+        search_box.grab_focus();
+    }
 }
 
-pub fn build_main_box(window: &ApplicationWindow) -> gtk::Box {
+pub fn build_main_box(
+    window: &ApplicationWindow,
+) -> (gtk::Box, gtk::SearchEntry) {
     let main_box = gtk::Box::builder()
         .spacing(10)
         .margin_top(10)
@@ -44,11 +50,16 @@ pub fn build_main_box(window: &ApplicationWindow) -> gtk::Box {
         .build();
 
     // build the "search" stack
-    let search_pane = {
-        let search = build_search(window.clone());
+    let search_box = {
+        let search_pane = build_search(window.clone());
         let name = "🔎 Search";
-        stack.add_titled(&search, Some(name), name);
-        search
+        stack.add_titled(&search_pane, Some(name), name);
+
+        search_pane
+            .first_child()
+            .unwrap()
+            .downcast::<SearchEntry>()
+            .unwrap()
     };
 
     // build the "recents" stack
@@ -109,9 +120,8 @@ pub fn build_main_box(window: &ApplicationWindow) -> gtk::Box {
     main_box.append(&sidebar);
     main_box.append(&stack);
 
-    search_pane.first_child().unwrap().grab_focus();
-
-    main_box
+    // search_pane.first_child().unwrap()
+    (main_box, search_box)
 }
 
 pub fn build_settings(window: &ApplicationWindow) -> gtk::Box {
@@ -154,7 +164,7 @@ pub fn build_settings(window: &ApplicationWindow) -> gtk::Box {
                 conf.preferred_skin_tone = *tone;
             }
 
-            reapply_main_box(&window2);
+            reapply_main_box(&window2, true);
         });
 
         skin_tones_box.append(&btn);
@@ -184,7 +194,7 @@ pub fn build_settings(window: &ApplicationWindow) -> gtk::Box {
             let conf = conf.as_mut().unwrap();
             conf.recent_emojis.clear();
         }
-        reapply_main_box(&window2);
+        reapply_main_box(&window2, true);
     });
 
     let settings_box = gtk::Box::builder()

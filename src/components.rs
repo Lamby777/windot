@@ -242,10 +242,15 @@ pub fn build_search(window: ApplicationWindow) -> gtk::Box {
         parent.append(&build_grid(
             &window,
             all_emojis_in_preferred_tone().filter(|e| {
-                e.with_skin_tone(SkinTone::Default)
-                    .unwrap_or(e)
-                    .shortcodes()
-                    .any(|sc| sc.contains(&sb.text().to_string()))
+                let emoji_with_tone =
+                    e.with_skin_tone(SkinTone::Default).unwrap_or(e);
+                let search_text = sb.text().to_string();
+
+                // Check both name and shortcodes
+                emoji_with_tone.name().contains(&search_text)
+                    || emoji_with_tone.shortcode().map_or(false, |shortcode| {
+                        shortcode.contains(&search_text)
+                    })
             }),
         ));
     });

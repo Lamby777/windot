@@ -62,6 +62,17 @@ pub fn build_main_box(
             .unwrap()
     };
 
+    let window_clone = window.clone();
+    let key_controller = gtk::EventControllerKey::new();
+    key_controller.connect_key_pressed(move |_, keyval, _, _| {
+        if keyval == Key::Escape {
+            window_clone.set_visible(false);
+        }
+
+        glib::Propagation::Proceed
+    });
+    search_box.add_controller(key_controller);
+
     // build the "recents" stack
     {
         let search = build_grid(

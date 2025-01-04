@@ -6,12 +6,14 @@ use std::path::PathBuf;
 use std::sync::RwLock;
 
 use adw::Application;
+use arboard::Clipboard;
 use emojis::{Emoji, SkinTone};
 use gtk::prelude::*;
 use gtk::{
-    glib, ApplicationWindow, Button, CssProvider, Grid, Orientation,
+    gdk::Key, glib, ApplicationWindow, Button, CssProvider, Grid, Orientation,
     ScrolledWindow, SearchEntry, Stack, StackSidebar,
 };
+use once_cell::sync::Lazy;
 
 mod components;
 mod config;
@@ -22,6 +24,8 @@ use config::*;
 use consts::*;
 
 static CONFIG: RwLock<Option<Config>> = RwLock::new(None);
+static CLIPBOARD: Lazy<RwLock<Clipboard>> =
+    Lazy::new(|| RwLock::new(Clipboard::new().unwrap()));
 
 fn main() -> glib::ExitCode {
     // make the user data folder
@@ -42,7 +46,8 @@ fn main() -> glib::ExitCode {
 fn on_emoji_picked(button: &Button, window: &ApplicationWindow) {
     let emoji = button.label().unwrap();
     println!("Picked: {emoji}");
-    cli_clipboard::set_contents(emoji.to_string()).unwrap();
+    let mut clipboard = CLIPBOARD.write().unwrap();
+    clipboard.set_text(emoji.to_string()).unwrap();
 
     {
         let mut conf = CONFIG.write().unwrap();
@@ -101,6 +106,11 @@ fn load_css() {
 }
 
 fn build_window(app: &Application) {
+    if let Some(window) = app.active_window() {
+        window.present(); // Bring the existing window to the foreground
+        return;
+    }
+
     // Create a window
     let window = ApplicationWindow::builder()
         .application(app)
@@ -112,10 +122,21 @@ fn build_window(app: &Application) {
     reapply_main_box(&window, true);
     window.present();
 
-    window.connect_close_request(|_| {
-        CONFIG.read().unwrap().as_ref().unwrap().save();
+    let window_clone = window.clone();
+    let key_controller = gtk::EventControllerKey::new();
+    key_controller.connect_key_pressed(move |_, keyval, _, _| {
+        if keyval == Key::Escape {
+            window_clone.set_visible(false);
+        }
 
         glib::Propagation::Proceed
+    });
+    window.add_controller(key_controller);
+
+    window.connect_close_request(|win| {
+        CONFIG.read().unwrap().as_ref().unwrap().save();
+        win.set_visible(false);
+        glib::Propagation::Stop
     });
 }
 

@@ -1,7 +1,7 @@
-use gtk::prelude::*;
-use gtk::{Align, Separator};
-
 use super::*;
+use glib::{source::timeout_add_local, ControlFlow};
+use gtk::{Align, Separator};
+use std::time::Duration;
 
 /// Includes all the single-person skin tones.
 ///
@@ -236,23 +236,34 @@ pub fn build_search(window: ApplicationWindow) -> gtk::Box {
     stack.append(&grid);
 
     searchbox.connect_search_changed(move |sb| {
-        let parent = sb.parent().unwrap().downcast::<gtk::Box>().unwrap();
-        parent.remove(&parent.last_child().unwrap());
+        let debounce_time = Duration::from_millis(300);
+        let window_clone = window.clone();
+        let search_text = sb.text().to_string();
+        let sb_clone = sb.clone();
 
-        parent.append(&build_grid(
-            &window,
-            all_emojis_in_preferred_tone().filter(|e| {
-                let emoji_with_tone =
-                    e.with_skin_tone(SkinTone::Default).unwrap_or(e);
-                let search_text = sb.text().to_string();
+        timeout_add_local(debounce_time, move || {
+            let parent =
+                sb_clone.parent().unwrap().downcast::<gtk::Box>().unwrap();
+            if let Some(last_child) = parent.last_child() {
+                parent.remove(&last_child);
+            }
 
-                // Check both name and shortcodes
-                emoji_with_tone.name().contains(&search_text)
-                    || emoji_with_tone.shortcode().map_or(false, |shortcode| {
-                        shortcode.contains(&search_text)
-                    })
-            }),
-        ));
+            parent.append(&build_grid(
+                &window_clone,
+                all_emojis_in_preferred_tone().filter(|e| {
+                    let emoji_with_tone =
+                        e.with_skin_tone(SkinTone::Default).unwrap_or(e);
+                    emoji_with_tone.name().contains(&search_text)
+                        || emoji_with_tone
+                            .shortcode()
+                            .map_or(false, |shortcode| {
+                                shortcode.contains(&search_text)
+                            })
+                }),
+            ));
+
+            ControlFlow::Break
+        });
     });
 
     stack
@@ -265,7 +276,7 @@ pub fn build_grid(
     let grid = Grid::builder()
         .column_spacing(10)
         .row_homogeneous(true)
-        .column_homogeneous(true)
+        // .column_homogeneous(true)
         .build();
 
     let mut row = 0;
@@ -290,7 +301,7 @@ pub fn build_grid(
         .margin_bottom(10)
         .margin_start(10)
         .margin_end(10)
-        .width_request(500)
+        // .width_request(500)
         // .height_request(400)
         .vexpand(true)
         .child(&grid)

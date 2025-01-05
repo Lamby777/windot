@@ -1,7 +1,7 @@
 use emojis::Group;
 
 pub const APP_ID: &str = "org.sparklet.windot";
-pub const EMOJIS_PER_ROW: i32 = 10;
+// pub const EMOJIS_PER_ROW: i32 = 10;
 
 pub const fn group_display_name(group: Group) -> &'static str {
     match group {

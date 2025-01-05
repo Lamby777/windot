@@ -284,7 +284,7 @@ pub fn build_grid(
         .column_spacing(10)
         .homogeneous(true)
         .halign(gtk::Align::Fill)
-        .valign(gtk::Align::Fill)
+        .valign(gtk::Align::Start)
         .hexpand(true)
         .vexpand(true)
         .selection_mode(gtk::SelectionMode::None)
@@ -318,7 +318,15 @@ pub fn build_grid(
 }
 
 fn make_button(emoji: &'static Emoji, window: &ApplicationWindow) -> Button {
-    let button = Button::builder().label(emoji.to_string()).build();
+    let button = Button::builder()
+        .label(emoji.to_string())
+        .height_request(36) // You can adjust this value
+        // Optionally set width request if needed
+        .width_request(36) // You can adjust this value
+        // Make sure content stays centered
+        .valign(gtk::Align::Center)
+        .halign(gtk::Align::Center)
+        .build();
 
     let window2 = window.clone();
     button.connect_clicked(move |b| on_emoji_picked(b, &window2));

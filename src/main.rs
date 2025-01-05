@@ -10,7 +10,7 @@ use arboard::Clipboard;
 use emojis::{Emoji, SkinTone};
 use gtk::prelude::*;
 use gtk::{
-    gdk::Key, glib, ApplicationWindow, Button, CssProvider, Grid, Orientation,
+    gdk::Key, glib, ApplicationWindow, Button, CssProvider, Orientation,
     ScrolledWindow, SearchEntry, Stack, StackSidebar,
 };
 use once_cell::sync::Lazy;

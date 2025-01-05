@@ -1,6 +1,6 @@
 use super::*;
 use glib::{source::timeout_add_local, ControlFlow};
-use gtk::{Align, Separator};
+use gtk::{Align, FlowBox, Separator};
 use std::time::Duration;
 
 /// Includes all the single-person skin tones.
@@ -273,39 +273,34 @@ pub fn build_grid(
     window: &ApplicationWindow,
     emojis: impl Iterator<Item = &'static Emoji>,
 ) -> ScrolledWindow {
-    let grid = Grid::builder()
-        .column_spacing(10)
-        .row_homogeneous(true)
-        // .column_homogeneous(true)
-        .build();
-
-    let mut row = 0;
-    let mut col = 0;
-
-    for emoji in emojis {
-        let button = make_button(emoji, window);
-        grid.attach(&button, col, row, 1, 1);
-
-        col += 1;
-
-        if col == EMOJIS_PER_ROW {
-            col = 0;
-            row += 1;
-        }
-    }
-
-    ScrolledWindow::builder()
-        .hscrollbar_policy(gtk::PolicyType::Never)
-        .vscrollbar_policy(gtk::PolicyType::Automatic)
+    // Create the FlowBox
+    let flowbox = FlowBox::builder()
+        .orientation(gtk::Orientation::Horizontal)
         .margin_top(10)
         .margin_bottom(10)
         .margin_start(10)
         .margin_end(10)
-        // .width_request(500)
-        // .height_request(400)
-        .vexpand(true)
-        .child(&grid)
-        .build()
+        .row_spacing(10)
+        .column_spacing(10)
+        .max_children_per_line(EMOJIS_PER_ROW as u32)
+        .build();
+
+    // Add buttons to the FlowBox
+    for emoji in emojis {
+        let button = make_button(emoji, window);
+        flowbox.insert(&button, -1); // -1 appends to the end
+    }
+
+    // Wrap the FlowBox in a ScrolledWindow
+    let scrolled_window = ScrolledWindow::builder()
+        .hscrollbar_policy(gtk::PolicyType::Never)
+        .vscrollbar_policy(gtk::PolicyType::Automatic)
+        .min_content_width(640)
+        .min_content_height(480)
+        .child(&flowbox)
+        .build();
+
+    scrolled_window
 }
 
 fn make_button(emoji: &'static Emoji, window: &ApplicationWindow) -> Button {

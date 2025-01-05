@@ -328,6 +328,8 @@ fn make_button(emoji: &'static Emoji, window: &ApplicationWindow) -> Button {
         .halign(gtk::Align::Center)
         .build();
 
+    button.set_tooltip_text(Some(emoji.name().to_string().as_ref()));
+
     let window2 = window.clone();
     button.connect_clicked(move |b| on_emoji_picked(b, &window2));
 

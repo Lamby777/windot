@@ -236,7 +236,7 @@ pub fn build_search(window: ApplicationWindow) -> gtk::Box {
     stack.append(&grid);
 
     searchbox.connect_search_changed(move |sb| {
-        let debounce_time = Duration::from_millis(300);
+        let debounce_time = Duration::from_millis(700);
         let window_clone = window.clone();
         let search_text = sb.text().to_string();
         let sb_clone = sb.clone();
@@ -323,12 +323,11 @@ fn make_button(emoji: &'static Emoji, window: &ApplicationWindow) -> Button {
         .height_request(36) // You can adjust this value
         // Optionally set width request if needed
         .width_request(36) // You can adjust this value
+        .tooltip_text(emoji.name())
         // Make sure content stays centered
         .valign(gtk::Align::Center)
         .halign(gtk::Align::Center)
         .build();
-
-    button.set_tooltip_text(Some(emoji.name().to_string().as_ref()));
 
     let window2 = window.clone();
     button.connect_clicked(move |b| on_emoji_picked(b, &window2));

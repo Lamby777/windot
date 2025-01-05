@@ -273,7 +273,7 @@ pub fn build_grid(
     window: &ApplicationWindow,
     emojis: impl Iterator<Item = &'static Emoji>,
 ) -> ScrolledWindow {
-    // Create the FlowBox
+    // Create the FlowBox with responsive settings
     let flowbox = FlowBox::builder()
         .orientation(gtk::Orientation::Horizontal)
         .margin_top(10)
@@ -282,21 +282,35 @@ pub fn build_grid(
         .margin_end(10)
         .row_spacing(10)
         .column_spacing(10)
-        .max_children_per_line(EMOJIS_PER_ROW as u32)
+        .homogeneous(true)
+        .halign(gtk::Align::Fill)
+        .valign(gtk::Align::Fill)
+        .hexpand(true)
+        .vexpand(true)
+        .selection_mode(gtk::SelectionMode::None)
+        // Set minimum size for child items
+        .min_children_per_line(1)
+        // Let GTK calculate maximum based on available space
+        .max_children_per_line(100)
         .build();
 
     // Add buttons to the FlowBox
     for emoji in emojis {
         let button = make_button(emoji, window);
-        flowbox.insert(&button, -1); // -1 appends to the end
+        // Make each button expand to fill its space
+        button.set_hexpand(true);
+        button.set_vexpand(true);
+        flowbox.insert(&button, -1);
     }
 
-    // Wrap the FlowBox in a ScrolledWindow
+    // Create a ScrolledWindow that will expand with the window
     let scrolled_window = ScrolledWindow::builder()
         .hscrollbar_policy(gtk::PolicyType::Never)
         .vscrollbar_policy(gtk::PolicyType::Automatic)
-        .min_content_width(640)
-        .min_content_height(480)
+        .hexpand(true)
+        .vexpand(true)
+        .propagate_natural_height(true)
+        .propagate_natural_width(true)
         .child(&flowbox)
         .build();
 

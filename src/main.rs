@@ -8,12 +8,13 @@ use std::sync::RwLock;
 use adw::Application;
 use arboard::Clipboard;
 use emojis::{Emoji, SkinTone};
+use gtk::gdk::Key;
 use gtk::prelude::*;
 use gtk::{
-    gdk::Key, glib, ApplicationWindow, Button, CssProvider, Orientation,
-    ScrolledWindow, SearchEntry, Stack, StackSidebar,
+    glib, ApplicationWindow, Button, CssProvider, Orientation, ScrolledWindow,
+    SearchEntry, Stack, StackSidebar,
 };
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 mod components;
 mod config;
@@ -24,8 +25,8 @@ use config::*;
 use consts::*;
 
 static CONFIG: RwLock<Option<Config>> = RwLock::new(None);
-static CLIPBOARD: Lazy<RwLock<Clipboard>> =
-    Lazy::new(|| RwLock::new(Clipboard::new().unwrap()));
+static CLIPBOARD: LazyLock<RwLock<Clipboard>> =
+    LazyLock::new(|| RwLock::new(Clipboard::new().unwrap()));
 
 fn main() -> glib::ExitCode {
     // make the user data folder

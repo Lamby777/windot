@@ -65,11 +65,11 @@ pub fn build_main_box(
             .unwrap()
     };
 
-    let window_clone = window.clone();
+    let window2 = window.clone();
     let key_controller = gtk::EventControllerKey::new();
     key_controller.connect_key_pressed(move |_, keyval, _, _| {
         if keyval == Key::Escape {
-            window_clone.set_visible(false);
+            window2.set_visible(false);
         }
 
         glib::Propagation::Proceed
@@ -240,12 +240,14 @@ pub fn build_search(window: &ApplicationWindow) -> gtk::Box {
     stack.append(&flowbox);
 
     searchbox.connect_search_changed(move |sb| {
-        let debounce_time = Duration::from_millis(300); // Reduced debounce time since operation is faster
-        let search_text = sb.text().to_string().to_lowercase(); // Convert to lowercase once
-        let flowbox_clone = flowbox.clone();
+        // Reduced debounce time since operation is faster
+        let debounce_time = Duration::from_millis(300);
+
+        let search_text = sb.text().to_string().to_lowercase();
+        let flowbox2 = flowbox.clone();
 
         timeout_add_local(debounce_time, move || {
-            update_emoji_visibility(&flowbox_clone, &search_text);
+            update_emoji_visibility(&flowbox2, &search_text);
             ControlFlow::Break
         });
     });

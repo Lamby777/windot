@@ -123,11 +123,11 @@ fn build_window(app: &Application) {
     reapply_main_box(&window, true);
     window.present();
 
-    let window_clone = window.clone();
+    let window2 = window.clone();
     let key_controller = gtk::EventControllerKey::new();
     key_controller.connect_key_pressed(move |_, keyval, _, _| {
         if keyval == Key::Escape {
-            window_clone.set_visible(false);
+            window2.set_visible(false);
         }
 
         glib::Propagation::Proceed

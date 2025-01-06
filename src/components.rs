@@ -1,6 +1,6 @@
 use super::*;
 use glib::{source::timeout_add_local, ControlFlow};
-use gtk::{Align, FlowBox, Separator};
+use gtk::{Align, FlowBox, Separator, Viewport};
 use std::time::Duration;
 
 /// Includes all the single-person skin tones.
@@ -228,40 +228,21 @@ pub fn build_search(window: ApplicationWindow) -> gtk::Box {
         .orientation(Orientation::Vertical)
         .build();
 
-    let grid = build_grid(&window, all_emojis_in_preferred_tone());
-
     let searchbox = SearchEntry::builder().build();
 
+    // Build the grid only once
+    let flowbox = build_grid(&window, all_emojis_in_preferred_tone());
+
     stack.append(&searchbox);
-    stack.append(&grid);
+    stack.append(&flowbox);
 
     searchbox.connect_search_changed(move |sb| {
-        let debounce_time = Duration::from_millis(700);
-        let window_clone = window.clone();
-        let search_text = sb.text().to_string();
-        let sb_clone = sb.clone();
+        let debounce_time = Duration::from_millis(300); // Reduced debounce time since operation is faster
+        let search_text = sb.text().to_string().to_lowercase(); // Convert to lowercase once
+        let flowbox_clone = flowbox.clone();
 
         timeout_add_local(debounce_time, move || {
-            let parent =
-                sb_clone.parent().unwrap().downcast::<gtk::Box>().unwrap();
-            if let Some(last_child) = parent.last_child() {
-                parent.remove(&last_child);
-            }
-
-            parent.append(&build_grid(
-                &window_clone,
-                all_emojis_in_preferred_tone().filter(|e| {
-                    let emoji_with_tone =
-                        e.with_skin_tone(SkinTone::Default).unwrap_or(e);
-                    emoji_with_tone.name().contains(&search_text)
-                        || emoji_with_tone
-                            .shortcode()
-                            .map_or(false, |shortcode| {
-                                shortcode.contains(&search_text)
-                            })
-                }),
-            ));
-
+            update_emoji_visibility(&flowbox_clone, &search_text);
             ControlFlow::Break
         });
     });
@@ -269,11 +250,55 @@ pub fn build_search(window: ApplicationWindow) -> gtk::Box {
     stack
 }
 
+fn update_emoji_visibility(
+    scrolled_window: &ScrolledWindow,
+    search_text: &str,
+) {
+    // First get the Viewport
+    if let Some(viewport) = scrolled_window
+        .child()
+        .and_then(|child| child.downcast::<Viewport>().ok())
+    {
+        // Then get the FlowBox from the Viewport
+        if let Some(flowbox) = viewport
+            .child()
+            .and_then(|child| child.downcast::<FlowBox>().ok())
+        {
+            let n_items = flowbox.observe_children().n_items();
+
+            for i in 0..n_items {
+                if let Some(child) = flowbox.child_at_index(i as i32) {
+                    if let Some(button) = child.first_child() {
+                        if let Some(button) = button.downcast::<Button>().ok() {
+                            // Get emoji data from button
+                            if let Some(tooltip) = button.tooltip_text() {
+                                let is_match = if search_text.is_empty() {
+                                    true
+                                } else {
+                                    tooltip.to_lowercase().contains(search_text) ||
+                                    // Optionally check shortcode if available
+                                    button.label().and_then(|label| {
+                                        emojis::get(&label).and_then(|emoji| {
+                                            emoji.shortcode().map(|shortcode|
+                                                shortcode.contains(search_text))
+                                        })
+                                    }).unwrap_or(false)
+                                };
+
+                                child.set_visible(is_match);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub fn build_grid(
     window: &ApplicationWindow,
     emojis: impl Iterator<Item = &'static Emoji>,
 ) -> ScrolledWindow {
-    // Create the FlowBox with responsive settings
     let flowbox = FlowBox::builder()
         .orientation(gtk::Orientation::Horizontal)
         .margin_top(10)
@@ -288,23 +313,19 @@ pub fn build_grid(
         .hexpand(true)
         .vexpand(true)
         .selection_mode(gtk::SelectionMode::None)
-        // Set minimum size for child items
         .min_children_per_line(1)
-        // Let GTK calculate maximum based on available space
         .max_children_per_line(100)
         .build();
 
-    // Add buttons to the FlowBox
+    // Add all emojis to the FlowBox once
     for emoji in emojis {
         let button = make_button(emoji, window);
-        // Make each button expand to fill its space
         button.set_hexpand(true);
         button.set_vexpand(true);
         flowbox.insert(&button, -1);
     }
 
-    // Create a ScrolledWindow that will expand with the window
-    let scrolled_window = ScrolledWindow::builder()
+    ScrolledWindow::builder()
         .hscrollbar_policy(gtk::PolicyType::Never)
         .vscrollbar_policy(gtk::PolicyType::Automatic)
         .hexpand(true)
@@ -312,9 +333,7 @@ pub fn build_grid(
         .propagate_natural_height(true)
         .propagate_natural_width(true)
         .child(&flowbox)
-        .build();
-
-    scrolled_window
+        .build()
 }
 
 fn make_button(emoji: &'static Emoji, window: &ApplicationWindow) -> Button {

@@ -1,7 +1,10 @@
 use super::*;
-use glib::{source::timeout_add_local, ControlFlow};
-use gtk::{Align, FlowBox, Separator, Viewport};
+
 use std::time::Duration;
+
+use glib::source::timeout_add_local;
+use glib::ControlFlow;
+use gtk::{Align, FlowBox, Separator, Viewport};
 
 /// Includes all the single-person skin tones.
 ///
@@ -19,7 +22,7 @@ const PREFERRABLE_SKIN_TONES: &[SkinTone] = &[
 /// Run this after changing any config values.
 /// It will rebuild the whole UI again and show it with the new settings in mind.
 pub fn reapply_main_box(window: &ApplicationWindow, focus_search: bool) {
-    let (main_box, search_box) = build_main_box(&window);
+    let (main_box, search_box) = build_main_box(window);
     window.set_child(Some(&main_box));
 
     if focus_search {
@@ -51,7 +54,7 @@ pub fn build_main_box(
 
     // build the "search" stack
     let search_box = {
-        let search_pane = build_search(window.clone());
+        let search_pane = build_search(window);
         let name = "🔎 Search";
         stack.add_titled(&search_pane, Some(name), name);
 
@@ -223,7 +226,7 @@ pub fn build_settings(window: &ApplicationWindow) -> gtk::Box {
     stack
 }
 
-pub fn build_search(window: ApplicationWindow) -> gtk::Box {
+pub fn build_search(window: &ApplicationWindow) -> gtk::Box {
     let stack = gtk::Box::builder()
         .orientation(Orientation::Vertical)
         .build();
@@ -231,7 +234,7 @@ pub fn build_search(window: ApplicationWindow) -> gtk::Box {
     let searchbox = SearchEntry::builder().build();
 
     // Build the grid only once
-    let flowbox = build_grid(&window, all_emojis_in_preferred_tone());
+    let flowbox = build_grid(window, all_emojis_in_preferred_tone());
 
     stack.append(&searchbox);
     stack.append(&flowbox);
@@ -267,15 +270,19 @@ fn update_emoji_visibility(
             let n_items = flowbox.observe_children().n_items();
 
             for i in 0..n_items {
-                if let Some(child) = flowbox.child_at_index(i as i32) {
-                    if let Some(button) = child.first_child() {
-                        if let Some(button) = button.downcast::<Button>().ok() {
-                            // Get emoji data from button
-                            if let Some(tooltip) = button.tooltip_text() {
-                                let is_match = if search_text.is_empty() {
-                                    true
-                                } else {
-                                    tooltip.to_lowercase().contains(search_text) ||
+                let Some(child) = flowbox.child_at_index(i.try_into().unwrap())
+                else {
+                    continue;
+                };
+
+                if let Some(button) = child.first_child() {
+                    if let Ok(button) = button.downcast::<Button>() {
+                        // Get emoji data from button
+                        if let Some(tooltip) = button.tooltip_text() {
+                            let is_match = if search_text.is_empty() {
+                                true
+                            } else {
+                                tooltip.to_lowercase().contains(search_text) ||
                                     // Optionally check shortcode if available
                                     button.label().and_then(|label| {
                                         emojis::get(&label).and_then(|emoji| {
@@ -283,10 +290,9 @@ fn update_emoji_visibility(
                                                 shortcode.contains(search_text))
                                         })
                                     }).unwrap_or(false)
-                                };
+                            };
 
-                                child.set_visible(is_match);
-                            }
+                            child.set_visible(is_match);
                         }
                     }
                 }

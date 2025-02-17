@@ -1,9 +1,11 @@
 #![warn(clippy::pedantic)]
 #![allow(clippy::wildcard_imports)]
 
+use std::error::Error;
 use std::fs;
+use std::future::pending;
 use std::path::PathBuf;
-use std::sync::RwLock;
+use std::sync::{LazyLock, RwLock};
 
 use adw::Application;
 use arboard::Clipboard;
@@ -14,7 +16,17 @@ use gtk::{
     glib, ApplicationWindow, Button, CssProvider, Orientation, ScrolledWindow,
     SearchEntry, Stack, StackSidebar,
 };
-use std::sync::LazyLock;
+
+use zbus::{connection, interface};
+
+struct DBusService;
+
+#[interface(name = "org.sparklet.windot1")]
+impl DBusService {
+    fn say_hello(&mut self, name: &str) -> String {
+        format!("Hello {}! I have been called.", name)
+    }
+}
 
 mod components;
 mod config;
@@ -28,7 +40,16 @@ static CONFIG: RwLock<Option<Config>> = RwLock::new(None);
 static CLIPBOARD: LazyLock<RwLock<Clipboard>> =
     LazyLock::new(|| RwLock::new(Clipboard::new().unwrap()));
 
-fn main() -> glib::ExitCode {
+// block until enter is pressed, for debugging
+#[allow(dead_code)]
+fn pause() {
+    use std::io::Read as _;
+    println!("Press Enter to continue...");
+    let _ = std::io::stdin().read(&mut [0]);
+}
+
+#[tokio::main]
+async fn main() -> glib::ExitCode {
     // make the user data folder
     let data_dir = user_data_dir();
     if !data_dir.exists() && fs::create_dir_all(&data_dir).is_err() {

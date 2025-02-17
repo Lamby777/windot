@@ -1230,7 +1230,7 @@ checksum = "53a85b86a771b1c87058196170769dd264f66c0782acf1ae6cc51bfd64b39082"
 
 [[package]]
 name = "windot"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "arboard",
  "dirs",

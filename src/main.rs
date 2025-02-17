@@ -116,8 +116,7 @@ fn build_window(app: &Application) {
     let window = ApplicationWindow::builder()
         .application(app)
         .title("Select an emoji.")
-        .build()
-        .clone();
+        .build();
 
     // Present window
     reapply_main_box(&window, true);

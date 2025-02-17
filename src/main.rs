@@ -1,9 +1,7 @@
 #![warn(clippy::pedantic)]
 #![allow(clippy::wildcard_imports)]
 
-use std::error::Error;
 use std::fs;
-use std::future::pending;
 use std::path::PathBuf;
 use std::sync::{LazyLock, RwLock};
 
@@ -17,17 +15,6 @@ use gtk::{
     SearchEntry, Stack, StackSidebar,
 };
 
-use zbus::{connection, interface};
-
-struct DBusService;
-
-#[interface(name = "org.sparklet.windot1")]
-impl DBusService {
-    fn say_hello(&mut self, name: &str) -> String {
-        format!("Hello {}! I have been called.", name)
-    }
-}
-
 mod components;
 mod config;
 mod consts;
@@ -40,16 +27,7 @@ static CONFIG: RwLock<Option<Config>> = RwLock::new(None);
 static CLIPBOARD: LazyLock<RwLock<Clipboard>> =
     LazyLock::new(|| RwLock::new(Clipboard::new().unwrap()));
 
-// block until enter is pressed, for debugging
-#[allow(dead_code)]
-fn pause() {
-    use std::io::Read as _;
-    println!("Press Enter to continue...");
-    let _ = std::io::stdin().read(&mut [0]);
-}
-
-#[tokio::main]
-async fn main() -> glib::ExitCode {
+fn main() -> glib::ExitCode {
     // make the user data folder
     let data_dir = user_data_dir();
     if !data_dir.exists() && fs::create_dir_all(&data_dir).is_err() {
@@ -129,7 +107,34 @@ fn load_css() {
 
 fn build_window(app: &Application) {
     if let Some(window) = app.active_window() {
-        window.present(); // Bring the existing window to the foreground
+        // TODO this is a massive hack that will break any time the structure
+        // is changed. needs fixing asap, refer to previous commit for dbus stuff
+        //
+        // i had months to care, but atp i'd rather just have a working emoji picker
+        // that doesn't require you to manually select the searchbox after your first
+        // time opening it
+        let entry = window
+            .child() // main box
+            .unwrap()
+            .downcast::<gtk::Box>()
+            .unwrap()
+            .first_child() // stacksidebar
+            .unwrap()
+            .next_sibling() // the stack next to it
+            .unwrap()
+            .first_child() // box inside the stack
+            .unwrap()
+            .first_child() // entry inside that box
+            .unwrap()
+            .downcast::<SearchEntry>()
+            .unwrap();
+
+        entry.grab_focus();
+        entry.set_text("");
+
+        // Bring the existing window to the foreground
+        window.present();
+
         return;
     }
 
